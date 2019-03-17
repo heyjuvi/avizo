@@ -1,5 +1,9 @@
 # Avizo
 
+Avizo is a simple notification daemon, mainly intended to be used for multimedia keys for example with Sway.
+
+![Screenshot of Avizo's volume notification](https://raw.githubusercontent.com/misterdanb/avizo/master/github/screenshot.png)
+
 ## Sway config
 
 ```
