@@ -7,7 +7,7 @@
 		<property name="app_paintable">true</property>
 		<property name="type_hint">notification</property>
 		<property name="type">popup</property>
-		<property name="title">noti</property>
+		<property name="title">avizo</property>
 
 		<child>
 			<object class="GtkBox">

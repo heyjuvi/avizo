@@ -14,6 +14,10 @@ bindsym XF86AudioMute exec volumectl mute
 bindsym XF86MonBrightnessUp exec lightctl raise
 bindsym XF86MonBrightnessDown exec lightctl lower
 
+for_window [title="avizo"] border pixel 0
+for_window [title="avizo"] sticky toggle
+no_focus [title="avizo"]<Paste>
+
 exec "avizo-service"
 ```
 
