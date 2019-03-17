@@ -6,15 +6,19 @@ running=$(ps h -C "$me" | grep -wv $$ | wc -l);
 
 time=4
 
+off=$(amixer get Master | grep -o "off" | head -n 1)
+
+if [[ "$1" == "mute" || "$off" == *"off"* ]]
+then
+    echo `amixer set Master toggle` > /dev/null
+fi
+
 if [[ "$1" == "lower" ]]
 then
     echo `amixer set Master 5%-` > /dev/null
 elif [[ "$1" == "raise" ]]
 then
     echo `amixer set Master 5%+` > /dev/null
-elif [[ "$1" == "mute" ]]
-then
-    echo `amixer set Master toggle` > /dev/null
 fi
 
 vol=$(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)
@@ -22,7 +26,7 @@ off=$(amixer get Master | grep -o "off" | head -n 1)
 
 alpha="0.5"
 
-if [[ "$1" == "mute" && "$off" != *"off"* ]]
+if [[ "$1" == "mute" && "$off" == *"off"* ]]
 then
     avizo-client --image-resource="volume_muted" --progress="0" --time=$time --background="rgba(255, 255, 255, $alpha)"
 else
