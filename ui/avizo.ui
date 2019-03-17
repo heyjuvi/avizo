@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<interface>
+	<template class="AvizoWindow" parent="GtkWindow">
+		<property name="visible">false</property>
+		<property name="can_focus">false</property>
+		<property name="resizable">false</property>
+		<property name="app_paintable">true</property>
+		<property name="type_hint">notification</property>
+		<property name="type">popup</property>
+		<property name="title">noti</property>
+
+		<child>
+			<object class="GtkBox">
+				<property name="visible">true</property>
+				<property name="can_focus">false</property>
+				<property name="orientation">vertical</property>
+				<property name="spacing">0</property>
+
+				<child>
+					<object class="GtkImage" id="image">
+						<property name="visible">true</property>
+						<property name="can_focus">false</property>
+					</object>
+					<packing>
+						<property name="expand">True</property>
+						<property name="fill">True</property>
+						<property name="position">0</property>
+					</packing>
+				</child>	
+			</object>
+		</child>
+	</template>
+</interface>

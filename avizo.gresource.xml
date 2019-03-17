@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gresources>
+	<gresource prefix="/org/danb/avizo">
+		<file preprocess="xml-stripblanks">ui/avizo.ui</file>
+
+		<file preprocess="to-pixdata">data/images/volume_muted.png</file>
+		<file preprocess="to-pixdata">data/images/volume_low.png</file>
+		<file preprocess="to-pixdata">data/images/volume_medium.png</file>
+		<file preprocess="to-pixdata">data/images/volume_high.png</file>
+
+		<file preprocess="to-pixdata">data/images/brightness_low.png</file>
+		<file preprocess="to-pixdata">data/images/brightness_medium.png</file>
+		<file preprocess="to-pixdata">data/images/brightness_high.png</file>
+	</gresource>
+</gresources>
