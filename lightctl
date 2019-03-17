@@ -9,25 +9,25 @@ bias=0
 
 if [[ "$1" == "lower" ]]
 then
-    bias=-1
+    light -U 5
 elif [[ "$1" == "raise" ]]
 then
-    bias=1
+    light -A 5
 fi
 
-light=$(cat /sys/class/backlight/acpi_video0/brightness)
-biased=$(echo "scale=2; $light + $bias" | bc)
-scaled=$(echo "scale=2; ($light + $bias) / 15.0" | bc)
+light=$(light)
+light=$(echo $light | awk '{print int($1+0.5)}')
+scaled=$(echo "scale=2; $light / 100.0" | bc)
 
 alpha="0.5"
 
-if [ "$biased" -lt "6" ]
+if [ "$light" -lt "34" ]
 then
     avizo-client --image-resource="brightness_low" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-elif [ "$biased" -lt "11" ]
+elif [ "$light" -lt "66" ]
 then
     avizo-client --image-resource="brightness_medium" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-elif [ "$biased" -lt "16" ]
+elif [ "$light" -lt "101" ]
 then
     avizo-client --image-resource="brightness_high" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
 fi
