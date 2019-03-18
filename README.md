@@ -16,7 +16,7 @@ bindsym XF86MonBrightnessDown exec lightctl lower
 
 for_window [title="avizo"] border pixel 0
 for_window [title="avizo"] sticky toggle
-no_focus [title="avizo"]<Paste>
+no_focus [title="avizo"]
 
 exec "avizo-service"
 ```
