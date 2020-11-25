@@ -21,10 +21,12 @@ sources_client = [
 
 executable('avizo-service',
   sources_service,
+  vala_args: ['--pkg=GtkLayerShell-0.1'],
   dependencies: [
     glib_dep,
     gtk_dep,
     gobject_dep,
+    meson.get_compiler('c').find_library('gtk-layer-shell')
   ],
   install: true,
 )

@@ -1,4 +1,5 @@
 using Gtk;
+using GtkLayerShell;
 
 [GtkTemplate (ui = "/org/danb/avizo/ui/avizo.ui")]
 public class AvizoWindow : Gtk.Window
@@ -271,6 +272,11 @@ public class AvizoService : GLib.Object
 	public AvizoService()
 	{
 		_window = new AvizoWindow();
+
+		GtkLayerShell.init_for_window(_window);
+		GtkLayerShell.auto_exclusive_zone_enable(_window);
+		GtkLayerShell.set_layer(_window, GtkLayerShell.Layer.OVERLAY);
+		GtkLayerShell.set_keyboard_interactivity(_window, false);
 	}
 
 	public void show(double seconds) throws DBusError, IOError
