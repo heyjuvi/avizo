@@ -14,7 +14,6 @@ bindsym XF86AudioMute exec volumectl mute
 bindsym XF86MonBrightnessUp exec lightctl raise
 bindsym XF86MonBrightnessDown exec lightctl lower
 
-
 exec "avizo-service"
 ```
 
