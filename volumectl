@@ -1,47 +1,161 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-me="$(basename "$0")";
-running=$(ps h -C "$me" | grep -wv $$ | wc -l);
-[[ $running > 1 ]] && exit;
-
-time=4
-
-off=$(amixer get Master | grep -o "off" | head -n 1)
-
-if [[ "$1" == "mute" || "$off" == *"off"* ]]
-then
-    echo `amixer set Master toggle` > /dev/null
+if [ "z$VOLUME_DEBUG" != "z" ]; then
+    set -x
 fi
 
-if [[ "$1" == "lower" ]]
-then
-    echo `amixer set Master 5%-` > /dev/null
-elif [[ "$1" == "raise" ]]
-then
-    echo `amixer set Master 5%+` > /dev/null
-fi
+function _current() {
+  CURRENT=$(pactl list sinks |\
+    grep '^[[:space:]]Volume:' |\
+    head -n $(( $DEF_SINK_N + 1 )) |\
+    tail -n 1 |\
+    sed -e 's,.* \([0-9][0-9]*\)%.*,\1,')
+}
+function _is_muted() {
+  OUT_MUTED=$(pactl list sinks |\
+    grep '^[[:space:]]Mute:' |\
+    head -n $(( $DEF_SINK_N + 1 )) |\
+    tail -n 1 |\
+    awk -F": " '{print $2}')
 
-vol=$(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)
-off=$(amixer get Master | grep -o "off" | head -n 1)
+  IN_MUTED=$(pactl list sources|\
+    grep '^[[:space:]]\(Mute\|Name\)'|\
+    grep $DEF_SOURCE -A 1|\
+    grep Mute|\
+    awk -F": " '{print $2}')
+}
 
-alpha="0.5"
+AMOUNT="5%"
+TIME=1
+DEF_SINK=$(pactl info | grep "Default Sink: "| awk -F": " '{print $2}')
+DEF_SINK_N=$(pactl list short sinks | grep $DEF_SINK | cut -f1)
+DEF_SOURCE=$(pactl info | grep "Default Source: "| awk -F": " '{print $2}')
 
-if [[ "$1" == "mute" && "$off" == *"off"* ]]
-then
-    avizo-client --image-resource="volume_muted" --progress="0" --time=$time --background="rgba(255, 255, 255, $alpha)"
-else
-    scaled=$(echo "scale=2; $vol / 100.0" | bc)
-    echo $scaled
+function _maybe_unmute() {
+  _is_muted
+  if [[ "$OUT_MUTED" = "yes" ]]; then
+    pactl set-sink-mute @DEFAULT_SINK@ false
+  fi
+}
 
-    if [ "$vol" -lt "34" ]
-    then
-        avizo-client --image-resource="volume_low" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-    elif [ "$vol" -lt "67" ]
-    then
-        avizo-client --image-resource="volume_medium" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-    elif [ "$vol" -lt "101" ]
-    then
-        avizo-client --image-resource="volume_high" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-    fi
-fi
+function _raise() {
+  _maybe_unmute
+  _current
+  if [ ${CURRENT} -lt 100 ]; then
+      pactl set-sink-volume @DEFAULT_SINK@ "+${AMOUNT}"
+  fi
+}
 
+function _lower() {
+  _maybe_unmute
+  pactl set-sink-volume @DEFAULT_SINK@ "-${AMOUNT}"
+}
+
+function _toggle_out_mute() {
+  pactl set-sink-mute @DEFAULT_SINK@ toggle
+}
+
+function _toggle_in_mute() {
+  for SOURCE in $(pactl list short sources | grep -v monitor | cut -f1)
+  do
+    pactl set-source-mute $SOURCE toggle
+  done
+}
+
+function _notify() {
+  local alpha="0.5"
+
+  _is_muted
+  _current
+  if [[ "$1" == "out-mute" && "$OUT_MUTED" == "yes" ]]
+  then
+      avizo-client --image-resource="volume_muted" --progress="0" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+  elif [[ "$1" == "in-mute" && "$IN_MUTED" == "yes" ]]
+  then
+      avizo-client --image-resource="mic_muted" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+  elif [[ "$1" == "in-mute" && "$IN_MUTED" == "no" ]]
+  then
+      avizo-client --image-resource="mic_unmuted" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+  else
+      local scaled=$(echo "scale=2; $CURRENT / 100.0" | bc)
+
+      if [ "$CURRENT" -lt "34" ]
+      then
+          avizo-client --image-resource="volume_low" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+      elif [ "$CURRENT" -lt "67" ]
+      then
+          avizo-client --image-resource="volume_medium" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+      elif [ "$CURRENT" -lt "101" ]
+      then
+          avizo-client --image-resource="volume_high" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
+      fi
+  fi
+}
+
+function raise() {
+  _raise
+  _notify
+}
+
+function lower() {
+  _lower
+  _notify
+}
+
+function toggle_out_mute() {
+  _toggle_out_mute
+  _notify out-mute
+}
+
+function toggle_in_mute() {
+  _toggle_in_mute
+  _notify in-mute
+}
+
+function help() {
+  cat <<EOH
+$0 [COMMAND]
+Control the volume of the default sink and displays the current outcome.
+May also mute/unmute all the microphone inputs.
+
+COMMAND:
+    raise|+    --  raises the volume
+    lower|-  --  lowers the volume
+    mute|m  --  toggles the mute state
+                (defaults to output, use --mic to specify to mute the mic)
+EOH
+}
+
+case $1 in
+  raise|+)
+    raise
+    exit 0
+    ;;
+  lower|-)
+    lower
+    exit 0
+    ;;
+  mute|m)
+    shift
+    case $1 in
+      --mic)
+        toggle_in_mute
+        exit 0
+        ;;
+      *)
+        toggle_out_mute
+        exit 0
+        ;;
+    esac
+    ;;
+  help|-h|--help)
+    help
+    exit 0
+    ;;
+  *)
+    help
+    exit 1
+    ;;
+esac
+
+# vim:set et ts=2 sts=0 sw=0:
