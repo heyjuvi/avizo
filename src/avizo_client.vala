@@ -108,6 +108,8 @@ public class AvizoClient : GLib.Application
 			print("  volume_low\n");
 			print("  volume_medium\n");
 			print("  volume_high\n");
+			print("  mic_muted\n");
+			print("  mic_unmuted\n");
 			print("  brightness_low\n");
 			print("  brightness_medium\n");
 			print("  brightness_high\n");
