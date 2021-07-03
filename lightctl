@@ -7,12 +7,17 @@ running=$(ps h -C "$me" | grep -wv $$ | wc -l);
 time=4
 bias=0
 
+min="0.5"
+max="5"
+light=$(light)
+diff=$(echo "scale=2; d = $light * 0.1; if (d < $min) $min else if (d > $max) $max else d" | bc)
+
 if [[ "$1" == "lower" ]]
 then
-    light -U 5
+    light -U "$diff"
 elif [[ "$1" == "raise" ]]
 then
-    light -A 5
+    light -A "$diff"
 fi
 
 light=$(light)
