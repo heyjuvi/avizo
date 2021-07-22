@@ -20,8 +20,6 @@ function _is_muted() {
 
 AMOUNT="5%"
 TIME=1
-DEF_SINK=$(pactl info | grep "Default Sink: "| awk -F": " '{print $2}')
-DEF_SINK_N=$(pactl list short sinks | grep $DEF_SINK | cut -f1)
 DEF_SOURCE=$(pactl info | grep "Default Source: "| awk -F": " '{print $2}')
 
 function _maybe_unmute() {
