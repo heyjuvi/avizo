@@ -5,18 +5,11 @@ if [ "z$VOLUME_DEBUG" != "z" ]; then
 fi
 
 function _current() {
-  CURRENT=$(pactl list sinks |\
-    grep '^[[:space:]]Volume:' |\
-    head -n $(( $DEF_SINK_N + 1 )) |\
-    tail -n 1 |\
-    sed -e 's,.* \([0-9][0-9]*\)%.*,\1,')
+  CURRENT=$(pamixer --get-volume)
 }
 function _is_muted() {
-  OUT_MUTED=$(pactl list sinks |\
-    grep '^[[:space:]]Mute:' |\
-    head -n $(( $DEF_SINK_N + 1 )) |\
-    tail -n 1 |\
-    awk -F": " '{print $2}')
+
+  OUT_MUTED=$(if $(pamixer --get-mute) == false; then echo yes; else echo no; fi)
 
   IN_MUTED=$(pactl list sources|\
     grep '^[[:space:]]\(Mute\|Name\)'|\
@@ -27,8 +20,6 @@ function _is_muted() {
 
 AMOUNT="5%"
 TIME=1
-DEF_SINK=$(pactl info | grep "Default Sink: "| awk -F": " '{print $2}')
-DEF_SINK_N=$(pactl list short sinks | grep $DEF_SINK | cut -f1)
 DEF_SOURCE=$(pactl info | grep "Default Source: "| awk -F": " '{print $2}')
 
 function _maybe_unmute() {
