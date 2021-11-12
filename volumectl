@@ -3,13 +3,12 @@
 if [ "z$VOLUME_DEBUG" != "z" ]; then
     set -x
 fi
-
 function _current() {
-  CURRENT=$(pamixer --get-volume)
+  CURRENT=$(pamixer --get-volume --sink $SELECTED_SINK_N)
 }
 function _is_muted() {
 
-  OUT_MUTED=$(if $(pamixer --get-mute) == false; then echo yes; else echo no; fi)
+  OUT_MUTED=$(if $(pamixer --get-mute --sink $SELECTED_SINK_N) == false; then echo yes; else echo no; fi)
 
   IN_MUTED=$(pactl list sources|\
     grep '^[[:space:]]\(Mute\|Name\)'|\
@@ -20,12 +19,16 @@ function _is_muted() {
 
 AMOUNT="5%"
 TIME=1
+DEFAULT_SINK=$(pactl info | grep "Default Sink: "| awk -F": " '{print $2}')
+RUNNING_SINK=$(pactl list short sinks | grep RUNNING | cut -f 2 | head -n 1)
+SELECTED_SINK=${RUNNING_SINK:-$DEFAULT_SINK}
+SELECTED_SINK_N=$(pactl list short sinks | grep $SELECTED_SINK | cut -f1)
 DEF_SOURCE=$(pactl info | grep "Default Source: "| awk -F": " '{print $2}')
 
 function _maybe_unmute() {
   _is_muted
   if [[ "$OUT_MUTED" = "yes" ]]; then
-    pactl set-sink-mute @DEFAULT_SINK@ false
+    pactl set-sink-mute $SELECTED_SINK false
   fi
 }
 
@@ -33,17 +36,17 @@ function _raise() {
   _maybe_unmute
   _current
   if [ ${CURRENT} -lt 100 ]; then
-      pactl set-sink-volume @DEFAULT_SINK@ "+${AMOUNT}"
+      pactl set-sink-volume $SELECTED_SINK "+${AMOUNT}"
   fi
 }
 
 function _lower() {
   _maybe_unmute
-  pactl set-sink-volume @DEFAULT_SINK@ "-${AMOUNT}"
+  pactl set-sink-volume $SELECTED_SINK "-${AMOUNT}"
 }
 
 function _toggle_out_mute() {
-  pactl set-sink-mute @DEFAULT_SINK@ toggle
+  pactl set-sink-mute $SELECTED_SINK toggle
 }
 
 function _toggle_in_mute() {
@@ -106,7 +109,7 @@ function toggle_in_mute() {
 function help() {
   cat <<EOH
 $0 [COMMAND]
-Control the volume of the default sink and displays the current outcome.
+Control the volume of the running sink and displays the current outcome.
 May also mute/unmute all the microphone inputs.
 
 COMMAND:
