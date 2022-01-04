@@ -12,8 +12,7 @@ public class AvizoWindow : Gtk.Window
 		{
 			_image_path = value;
 
-			var pixbuf = new Gdk.Pixbuf.from_file(_image_path);
-			image.set_from_pixbuf(pixbuf);
+			image.set_from_file(_image_path);
 		}
 	}
 
@@ -25,8 +24,7 @@ public class AvizoWindow : Gtk.Window
 		{
 			_image_resource = value;
 
-			var pixbuf = new Gdk.Pixbuf.from_resource(@"/org/danb/avizo/data/images/$(_image_resource).png");
-			image.set_from_pixbuf(pixbuf);
+			image.set_from_resource(@"/org/danb/avizo/data/images/$(_image_resource).png");
 		}
 	}
 
@@ -115,8 +113,7 @@ public class AvizoWindow : Gtk.Window
 
 		draw.connect(on_draw);
 
-		var pixbuf = new Gdk.Pixbuf.from_resource("/org/danb/avizo/data/images/volume_muted.png");
-		image.set_from_pixbuf(pixbuf);
+		image_resource = "volume_muted";
 	}
 
 	private bool on_draw(Gtk.Widget widget, Cairo.Context ctx)
