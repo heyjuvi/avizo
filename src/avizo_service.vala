@@ -60,21 +60,21 @@ public class AvizoWindow : Gtk.Window
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
 
-	public Gdk.RGBA bg { get; set; }
+	public Gdk.RGBA background { get; set; }
 
-	public Gdk.RGBA _fg;
-	public Gdk.RGBA fg
+	public Gdk.RGBA _foreground;
+	public Gdk.RGBA foreground
 	{
 		get
 		{
-			return _fg;
+			return _foreground;
 		}
 
 		set
 		{
-			_fg = value;
+			_foreground = value;
 
-			image.opacity = double.min(1.0, _fg.alpha * 2.0);
+			image.opacity = double.min(1.0, _foreground.alpha * 2.0);
 		}
 	}
 
@@ -90,11 +90,11 @@ public class AvizoWindow : Gtk.Window
 
 		var new_bg = Gdk.RGBA();
 		new_bg.parse("rgba(255, 255, 255, 0.5)");
-		bg = new_bg;
+		background = new_bg;
 
 		var new_fg = Gdk.RGBA();
 		new_fg.parse("rgba(0, 0, 0, 0.5)");
-		fg = new_fg;
+		foreground = new_fg;
 
 		var screen = get_screen();
 		var visual = screen.get_rgba_visual();
@@ -123,10 +123,10 @@ public class AvizoWindow : Gtk.Window
 		draw_rect(ctx, 0, 0, _width, _height);
 
 		ctx.set_operator(Cairo.Operator.SOURCE);
-		ctx.set_source_rgba(_bg.red, _bg.green, _bg.blue, _bg.alpha);
+		ctx.set_source_rgba(background.red, background.green, background.blue, background.alpha);
 		draw_round_rect(ctx, 0, 0, _width, _height, 16);
 
-		ctx.set_source_rgba(_bg.red, _bg.green, _bg.blue, _bg.alpha / 1.5);
+		ctx.set_source_rgba(background.red, background.green, background.blue, background.alpha / 1.5);
 
 		for (int i = 0; i < block_count; i++)
 		{
@@ -136,7 +136,7 @@ public class AvizoWindow : Gtk.Window
 			               block_height);
 		}
 
-		ctx.set_source_rgba(fg.red, fg.green, fg.blue, fg.alpha);
+		ctx.set_source_rgba(foreground.red, foreground.green, foreground.blue, foreground.alpha);
 
 		for (int i = 0; i < (int) (block_count * progress); i++)
 		{
@@ -245,14 +245,14 @@ public class AvizoService : GLib.Object
 
 	public Gdk.RGBA background
 	{
-		get { return _window.bg; }
-		set { _window.bg = value; }
+		get { return _window.background; }
+		set { _window.background = value; }
 	}
 
 	public Gdk.RGBA foreground
 	{
-		get { return _window.fg; }
-		set { _window.fg = value; }
+		get { return _window.foreground; }
+		set { _window.foreground = value; }
 	}
 
 	private AvizoWindow _window = null;
