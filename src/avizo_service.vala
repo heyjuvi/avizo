@@ -189,71 +189,22 @@ public class AvizoWindow : Gtk.Window
 [DBus (name = "org.danb.avizo.service")]
 public class AvizoService : GLib.Object
 {
-	public string image_path
-	{
-		get { return _window.image_path; }
-		set { _window.image_path = value; }
-	}
+	private static string[] props = {
+		"image_path", "image_resource", "progress", "width", "height", "padding",
+		"block_height", "block_spacing", "block_count", "background", "foreground",
+	};
 
-	public string image_resource
-	{
-		get { return _window.image_resource; }
-		set { _window.image_resource = value; }
-	}
-
-	public double progress
-	{
-		get { return _window.progress; }
-		set { _window.progress = value; }
-	}
-
-	public int width
-	{
-		get { return _window.width; }
-		set { _window.width = value; }
-	}
-
-	public int height
-	{
-		get { return _window.height; }
-		set { _window.height = value; }
-	}
-
-	public int padding
-	{
-		get { return _window.padding; }
-		set { _window.padding = value; }
-	}
-
-	public int block_height
-	{
-		get { return _window.block_height; }
-		set { _window.block_height = value; }
-	}
-
-	public int block_spacing
-	{
-		get { return _window.block_spacing; }
-		set { _window.block_spacing = value; }
-	}
-
-	public int block_count
-	{
-		get { return _window.block_count; }
-		set { _window.block_count = value; }
-	}
-
-	public Gdk.RGBA background
-	{
-		get { return _window.background; }
-		set { _window.background = value; }
-	}
-
-	public Gdk.RGBA foreground
-	{
-		get { return _window.foreground; }
-		set { _window.foreground = value; }
-	}
+	public string image_path { get; set; default = ""; }
+	public string image_resource { get; set; default = ""; }
+	public double progress { get; set; }
+	public int width { get; set; }
+	public int height { get; set; }
+	public int padding { get; set; }
+	public int block_height { get; set; }
+	public int block_spacing { get; set; }
+	public int block_count { get; set; }
+	public Gdk.RGBA background { get; set; }
+	public Gdk.RGBA foreground { get; set; }
 
 	private AvizoWindow _window = null;
 	private int _open_timeouts = 0;
@@ -261,6 +212,11 @@ public class AvizoService : GLib.Object
 	public AvizoService()
 	{
 		_window = new AvizoWindow();
+
+		foreach (var prop_name in props)
+		{
+			bind_property(prop_name, _window, prop_name, BindingFlags.DEFAULT);
+		}
 
 		GtkLayerShell.init_for_window(_window);
 		GtkLayerShell.auto_exclusive_zone_enable(_window);
