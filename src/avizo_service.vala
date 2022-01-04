@@ -202,28 +202,32 @@ public class AvizoService : GLib.Object
 	public Gdk.RGBA background { get; set; default = rgba(255, 255, 255, 0.5); }
 	public Gdk.RGBA foreground { get; set; default = rgba(0, 0, 0, 0.5); }
 
-	private AvizoWindow _window = null;
+	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;
-
-	public AvizoService()
-	{
-		_window = new AvizoWindow();
-
-		foreach (var prop_name in props)
-		{
-			bind_property(prop_name, _window, prop_name, BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
-		}
-
-		GtkLayerShell.init_for_window(_window);
-		GtkLayerShell.auto_exclusive_zone_enable(_window);
-		GtkLayerShell.set_layer(_window, GtkLayerShell.Layer.OVERLAY);
-		GtkLayerShell.set_keyboard_interactivity(_window, false);
-	}
 
 	public void show(double seconds) throws DBusError, IOError
 	{
-		_window.show();
-		_window.queue_draw();
+		var display = Gdk.Display.get_default();
+		var monitors = display.get_n_monitors();
+
+		if (_windows.length < monitors)
+		{
+			_windows.set_size(monitors);
+		}
+
+		for (int i = 0; i < monitors; i++)
+		{
+			var window = _windows.index(i);
+			if (window == null)
+			{
+				window = create_window();
+				_windows.insert_val(i, window);
+			}
+			GtkLayerShell.set_monitor(window, display.get_monitor(i));
+
+			window.show();
+			window.queue_draw();
+		}
 
 		_open_timeouts++;
 		Timeout.add((int) (seconds * 1000), () =>
@@ -232,11 +236,30 @@ public class AvizoService : GLib.Object
 
 			if (_open_timeouts == 0)
 			{
-				_window.hide();
+				for (int i = 0; i < monitors; i++) {
+					_windows.index(i).hide();
+				}
 			}
 
 			return false;
 		});
+	}
+
+	private AvizoWindow create_window()
+	{
+		var window = new AvizoWindow();
+
+		foreach (var prop_name in props)
+		{
+			bind_property(prop_name, window, prop_name, BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
+		}
+
+		GtkLayerShell.init_for_window(window);
+		GtkLayerShell.auto_exclusive_zone_enable(window);
+		GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
+		GtkLayerShell.set_keyboard_interactivity(window, false);
+
+		return window;
 	}
 }
 
