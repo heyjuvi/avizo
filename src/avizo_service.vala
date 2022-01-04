@@ -114,7 +114,7 @@ public class AvizoWindow : Gtk.Window
 		}
 
 		draw.connect(on_draw);
-		
+
 		var pixbuf = new Gdk.Pixbuf.from_resource("/org/danb/avizo/data/images/volume_muted.png");
 		image.set_from_pixbuf(pixbuf);
 	}
@@ -229,7 +229,7 @@ public class AvizoService : GLib.Object
 		get { return _window.height; }
 		set { _window.height = value; }
 	}
-	
+
 	public int padding
 	{
 		get { return _window.padding; }
@@ -320,7 +320,7 @@ public void main(string[] args)
 	             () => {},
 	             () => stderr.printf("Could not aquire name\n"));
 
-	AvizoService server = new AvizoService();
+	new AvizoService();
 
 	Gtk.main();
 }
