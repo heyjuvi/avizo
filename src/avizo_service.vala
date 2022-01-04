@@ -196,6 +196,7 @@ public class AvizoService : GLib.Object
 	public int width { get; set; default = 248; }
 	public int height { get; set; default = 232; }
 	public int padding { get; set; default = 24; }
+	public double y_offset { get; set; default = 0.5; }
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
@@ -223,10 +224,7 @@ public class AvizoService : GLib.Object
 				window = create_window();
 				_windows.insert_val(i, window);
 			}
-			GtkLayerShell.set_monitor(window, display.get_monitor(i));
-
-			window.show();
-			window.queue_draw();
+			show_window(window, display.get_monitor(i));
 		}
 
 		_open_timeouts++;
@@ -255,11 +253,23 @@ public class AvizoService : GLib.Object
 		}
 
 		GtkLayerShell.init_for_window(window);
-		GtkLayerShell.auto_exclusive_zone_enable(window);
 		GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
+		GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
+		GtkLayerShell.set_exclusive_zone(window, -1);
 		GtkLayerShell.set_keyboard_interactivity(window, false);
 
 		return window;
+	}
+
+	private void show_window(AvizoWindow window, Gdk.Monitor monitor)
+	{
+		GtkLayerShell.set_monitor(window, monitor);
+
+		var margin = (int) Math.lround((monitor.workarea.height - height) * y_offset);
+		GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, margin);
+
+		window.show();
+		window.queue_draw();
 	}
 }
 
