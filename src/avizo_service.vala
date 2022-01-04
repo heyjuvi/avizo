@@ -89,7 +89,7 @@ public class AvizoWindow : Gtk.Window
 	}
 
 	[GtkChild]
-	private Gtk.Image image;
+	private unowned Gtk.Image image;
 
 	public AvizoWindow()
 	{
