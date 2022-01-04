@@ -8,7 +8,10 @@ public class AvizoWindow : Gtk.Window
 	{
 		set
 		{
-			image.set_from_file(value);
+			if (value != "")
+			{
+				image.set_from_file(value);
+			}
 		}
 	}
 
@@ -16,11 +19,14 @@ public class AvizoWindow : Gtk.Window
 	{
 		set
 		{
-			image.set_from_resource(@"/org/danb/avizo/data/images/$(value).png");
+			if (value != "")
+			{
+				image.set_from_resource(@"/org/danb/avizo/data/images/$(value).png");
+			}
 		}
 	}
 
-	public double progress { get; set; default = 0.0; }
+	public double progress { get; set; }
 
 	private int _width = 248;
 	public int width
@@ -54,15 +60,15 @@ public class AvizoWindow : Gtk.Window
 		}
 	}
 
-	public int padding { get; set; default = 24; }
+	public int padding { get; set; }
 
-	public int block_height { get; set; default = 10; }
-	public int block_spacing { get; set; default = 2; }
-	public int block_count { get; set; default = 20; }
+	public int block_height { get; set; }
+	public int block_spacing { get; set; }
+	public int block_count { get; set; }
 
-	public Gdk.RGBA background { get; set; }
+	public Gdk.RGBA background { get; set; default = Gdk.RGBA(); }
 
-	public Gdk.RGBA _foreground;
+	public Gdk.RGBA _foreground = Gdk.RGBA();
 	public Gdk.RGBA foreground
 	{
 		get
@@ -88,14 +94,6 @@ public class AvizoWindow : Gtk.Window
 
 		set_default_size(_width, _height);
 
-		var new_bg = Gdk.RGBA();
-		new_bg.parse("rgba(255, 255, 255, 0.5)");
-		background = new_bg;
-
-		var new_fg = Gdk.RGBA();
-		new_fg.parse("rgba(0, 0, 0, 0.5)");
-		foreground = new_fg;
-
 		var screen = get_screen();
 		var visual = screen.get_rgba_visual();
 		if (visual != null && screen.is_composited())
@@ -104,8 +102,6 @@ public class AvizoWindow : Gtk.Window
 		}
 
 		draw.connect(on_draw);
-
-		image_resource = "volume_muted";
 	}
 
 	private bool on_draw(Gtk.Widget widget, Cairo.Context ctx)
@@ -195,16 +191,16 @@ public class AvizoService : GLib.Object
 	};
 
 	public string image_path { get; set; default = ""; }
-	public string image_resource { get; set; default = ""; }
-	public double progress { get; set; }
-	public int width { get; set; }
-	public int height { get; set; }
-	public int padding { get; set; }
-	public int block_height { get; set; }
-	public int block_spacing { get; set; }
-	public int block_count { get; set; }
-	public Gdk.RGBA background { get; set; }
-	public Gdk.RGBA foreground { get; set; }
+	public string image_resource { get; set; default = "volume_muted"; }
+	public double progress { get; set; default = 0.0; }
+	public int width { get; set; default = 248; }
+	public int height { get; set; default = 232; }
+	public int padding { get; set; default = 24; }
+	public int block_height { get; set; default = 10; }
+	public int block_spacing { get; set; default = 2; }
+	public int block_count { get; set; default = 20; }
+	public Gdk.RGBA background { get; set; default = rgba(255, 255, 255, 0.5); }
+	public Gdk.RGBA foreground { get; set; default = rgba(0, 0, 0, 0.5); }
 
 	private AvizoWindow _window = null;
 	private int _open_timeouts = 0;
@@ -215,7 +211,7 @@ public class AvizoService : GLib.Object
 
 		foreach (var prop_name in props)
 		{
-			bind_property(prop_name, _window, prop_name, BindingFlags.DEFAULT);
+			bind_property(prop_name, _window, prop_name, BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
 		}
 
 		GtkLayerShell.init_for_window(_window);
@@ -242,6 +238,16 @@ public class AvizoService : GLib.Object
 			return false;
 		});
 	}
+}
+
+Gdk.RGBA rgba(double red, double green, double blue, double alpha)
+{
+	var o = Gdk.RGBA();
+	o.red = red;
+	o.green = green;
+	o.blue = blue;
+	o.alpha = alpha;
+	return o;
 }
 
 void on_bus_aquired(DBusConnection conn)
