@@ -4,27 +4,19 @@ using GtkLayerShell;
 [GtkTemplate (ui = "/org/danb/avizo/ui/avizo.ui")]
 public class AvizoWindow : Gtk.Window
 {
-	private string _image_path = "";
 	public string image_path
 	{
-		get { return _image_path; }
 		set
 		{
-			_image_path = value;
-
-			image.set_from_file(_image_path);
+			image.set_from_file(value);
 		}
 	}
 
-	public string _image_resource = "";
 	public string image_resource
 	{
-		get { return _image_resource; }
 		set
 		{
-			_image_resource = value;
-
-			image.set_from_resource(@"/org/danb/avizo/data/images/$(_image_resource).png");
+			image.set_from_resource(@"/org/danb/avizo/data/images/$(value).png");
 		}
 	}
 
