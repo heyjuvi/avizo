@@ -40,7 +40,7 @@ public class AvizoWindow : Gtk.Window
 		{
 			_width = value;
 
-			set_default_size(_width, _height);
+			set_size_request(_width, _height);
 		}
 	}
 
@@ -56,7 +56,7 @@ public class AvizoWindow : Gtk.Window
 		{
 			_height = value;
 
-			set_default_size(_width, _height);
+			set_size_request(_width, _height);
 		}
 	}
 
@@ -89,11 +89,6 @@ public class AvizoWindow : Gtk.Window
 
 	public AvizoWindow()
 	{
-		_width = width;
-		_height = height;
-
-		set_default_size(_width, _height);
-
 		var screen = get_screen();
 		var visual = screen.get_rgba_visual();
 		if (visual != null && screen.is_composited())
