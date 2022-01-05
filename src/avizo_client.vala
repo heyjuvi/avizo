@@ -32,7 +32,7 @@ public class AvizoClient : GLib.Application
 	private static double _progress = 0.0;
 	private static int _width = 248;
 	private static int _height = 232;
-	private static double _y_offset = 0.5;
+	private static double _y_offset = 0.75;
 	private static int _padding = 24;
 	private static int _block_height = 10;
 	private static int _block_spacing = 2;

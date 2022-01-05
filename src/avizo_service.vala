@@ -196,7 +196,7 @@ public class AvizoService : GLib.Object
 	public int width { get; set; default = 248; }
 	public int height { get; set; default = 232; }
 	public int padding { get; set; default = 24; }
-	public double y_offset { get; set; default = 0.5; }
+	public double y_offset { get; set; default = 0.75; }
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
