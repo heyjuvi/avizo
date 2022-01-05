@@ -1,19 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-me="$(basename "$0")";
-running=$(ps h -C "$me" | grep -wv $$ | wc -l);
-[[ $running > 1 ]] && exit;
+me="$(basename "$0")"
+running=$(ps h -C "$me" | grep -wv $$ | wc -l)
+[ "$running" -gt 1 ] && exit
 
 time=4
 bias=0
 
-if [[ "$1" == "lower" ]]
-then
-    light -U 5
-elif [[ "$1" == "raise" ]]
-then
-    light -A 5
-fi
+case "$1" in
+	lower) light -U 5;;
+	raise) light -A 5;;
+esac
 
 light=$(light)
 light=$(echo $light | awk '{print int($1+0.5)}')
@@ -21,14 +18,13 @@ scaled=$(echo "scale=2; $light / 100.0" | bc)
 
 alpha="0.5"
 
-if [ "$light" -lt "34" ]
+if [ "$light" -lt 34 ]
 then
     avizo-client --image-resource="brightness_low" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-elif [ "$light" -lt "66" ]
+elif [ "$light" -lt 66 ]
 then
     avizo-client --image-resource="brightness_medium" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
-elif [ "$light" -lt "101" ]
+elif [ "$light" -lt 101 ]
 then
     avizo-client --image-resource="brightness_high" --progress=$scaled --time=$time --background="rgba(255, 255, 255, $alpha)"
 fi
-
