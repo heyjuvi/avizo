@@ -101,10 +101,10 @@ public class AvizoClient : GLib.Application
 		}
 		catch (OptionError e)
 		{
-			print(@"$(e.message)\n");
-			print(@"Run '$(args[0]) --help' to see a full list of available command line options.\n");
+			stderr.printf(@"avizo: $(e.message)\n");
+			stderr.printf(@"Run '$(args[0]) --help' to see a full list of available command line options.\n");
 
-			return 0;
+			return 1;
 		}
 
 		if (_show_version)
