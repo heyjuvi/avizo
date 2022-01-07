@@ -69,6 +69,19 @@ public class AvizoClient : GLib.Application
 
 	public override int command_line(ApplicationCommandLine command_line)
 	{
+		try
+		{
+			load_config();
+		}
+		catch (Error e)
+		{
+			if (!(e is KeyFileError.NOT_FOUND))
+			{
+				stderr.printf(@"avizo: Failed to load configuration file: $(e.message)\n");
+				return 1;
+			}
+		}
+
 		// this is an ugly workaround to deal with args being owned
 		string[] args = command_line.get_arguments();
 		string[] _args = new string[args.length];
@@ -153,6 +166,49 @@ public class AvizoClient : GLib.Application
 		_service.show(_time);
 
 		return 0;
+	}
+
+	private void load_config() throws KeyFileError, FileError
+	{
+		string[] search_dirs = {};
+		search_dirs += Environment.get_user_config_dir();
+		foreach (var dir in Environment.get_system_config_dirs())
+		{
+			search_dirs += dir;
+		}
+
+		string config_path;
+		var conf = new KeyFile();
+		conf.load_from_dirs("avizo/config.ini", search_dirs, out config_path, KeyFileFlags.NONE);
+
+		debug("Loading configuration from %s", config_path);
+
+		var group = conf.get_start_group();
+
+		// Copy key values from the config file into static variables of this class
+		// (e.g. `_width`) according to the mapping specified in the options array.
+		foreach (var entry in options)
+		{
+			if (entry.long_name == null || !conf.has_key(group, entry.long_name))
+			{
+				continue;
+			}
+			switch (entry.arg)
+			{
+				case OptionArg.DOUBLE:
+					*((double*) entry.arg_data) = conf.get_double(group, entry.long_name);
+					break;
+				case OptionArg.INT:
+					*((int*) entry.arg_data) = conf.get_integer(group, entry.long_name);
+					break;
+				case OptionArg.STRING:
+					var value = conf.get_string(group, entry.long_name);
+					*((void**) entry.arg_data) = (owned) value;
+					break;
+				default:
+					break;
+			}
+		}
 	}
 }
 
