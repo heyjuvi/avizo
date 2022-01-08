@@ -17,6 +17,30 @@ Names of the configuration keys correspond to the CLI options (e.g. `block-heigh
 
 Any configuration key can be overridden by corresponding CLI option (i.e. CLI options take precedence).
 
+
+## Helper scripts
+
+### volumectl
+
+Adjust the sound or mic volume and show Avizo notification.
+
+**Requirements:**
+
+* POSIX-sh compatible shell (e.g. Busybox ash, dash, ZSH, bash, …)
+* common \*nix userland (BSD, Busybox or GNU)
+* [pamixer](https://github.com/cdemoulins/pamixer)
+
+### lightctl
+
+Adjust (display) brightness and show Avizo notification.
+
+**Requirements:**
+
+* POSIX-sh compatible shell (e.g. Busybox ash, dash, ZSH, bash, …)
+* common \*nix userland (BSD, Busybox or GNU)
+* [brightnessctl](https://github.com/Hummer12007/brightnessctl) or [light](https://github.com/haikarainen/light)
+
+
 ## Sway config
 
 ```
