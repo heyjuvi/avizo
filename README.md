@@ -20,10 +20,10 @@ Any configuration key can be overridden by corresponding CLI option (i.e. CLI op
 ## Sway config
 
 ```
-bindsym XF86AudioRaiseVolume exec volumectl raise
-bindsym XF86AudioLowerVolume exec volumectl lower
-bindsym XF86AudioMute exec volumectl mute
-bindsym XF86AudioMicMute exec volumectl mute --mic
+bindsym XF86AudioRaiseVolume exec volumectl -u up
+bindsym XF86AudioLowerVolume exec volumectl -u down
+bindsym XF86AudioMute exec volumectl toggle-mute
+bindsym XF86AudioMicMute exec volumectl -m toggle-mute
 
 bindsym XF86MonBrightnessUp exec lightctl up
 bindsym XF86MonBrightnessDown exec lightctl down
