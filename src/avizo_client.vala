@@ -9,6 +9,7 @@ interface AvizoService : GLib.Object
 	public abstract int width { owned get; set; }
 	public abstract int height { owned get; set; }
 	public abstract int padding { owned get; set; }
+	public abstract double y_offset { owned get; set; }
 	public abstract int block_height { owned get; set; }
 	public abstract int block_spacing { owned get; set; }
 	public abstract int block_count { owned get; set; }
@@ -32,6 +33,7 @@ public class AvizoClient : GLib.Application
 	private static double _progress = 0.0;
 	private static int _width = 248;
 	private static int _height = 232;
+	private static double _y_offset = 0.75;
 	private static int _padding = 24;
 	private static int _block_height = 10;
 	private static int _block_spacing = 2;
@@ -50,6 +52,7 @@ public class AvizoClient : GLib.Application
 		{ "progress", 0, 0, OptionArg.DOUBLE, ref _progress, "Sets the progress in the notification, allowed values range from 0 to 1", "DOUBLE" },
 		{ "width", 0, 0, OptionArg.INT, ref _width, "Sets the width of the notification", "INT" },
 		{ "height", 0, 0, OptionArg.INT, ref _height, "Sets the height of the notification", "INT" },
+		{ "y-offset", 0, 0, OptionArg.DOUBLE, ref _y_offset, "Sets relative offset of the notification to the top of the screen, allowed values range from 0 (top) to 1.0 (bottom)", "DOUBLE" },
 		{ "padding", 0, 0, OptionArg.INT, ref _padding, "Sets the inner padding of the notification", "INT" },
 		{ "block-height", 0, 0, OptionArg.INT, ref _block_height, "Sets the block height of the progress indicator", "INT" },
 		{ "block-spacing", 0, 0, OptionArg.INT, ref _block_spacing, "Sets the spacing between blocks in the progress indicator", "INT" },
@@ -145,6 +148,7 @@ public class AvizoClient : GLib.Application
 		_service.width = _width;
 		_service.height = _height;
 		_service.padding = _padding;
+		_service.y_offset = _y_offset;
 		_service.block_height = _block_height;
 		_service.block_spacing = _block_spacing;
 		_service.block_count = _block_count;
