@@ -26,7 +26,8 @@ executable('avizo-service',
     glib_dep,
     gtk_dep,
     gobject_dep,
-    meson.get_compiler('c').find_library('gtk-layer-shell')
+    meson.get_compiler('c').find_library('gtk-layer-shell'),
+    meson.get_compiler('c').find_library('m', required : false)
   ],
   install: true,
 )
