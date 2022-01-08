@@ -26,6 +26,7 @@ public class AvizoClient : GLib.Application
 
 	private static bool _show_version = false;
 	private static bool _list_resources = false;
+	private static string _image_base_dir = @"$(Environment.get_user_data_dir())/avizo";
 	private static string _image_path = "";
 	private static string _image_resource = "volume_muted";
 	private static double _progress = 0.0;
@@ -43,6 +44,7 @@ public class AvizoClient : GLib.Application
 	private const GLib.OptionEntry[] options = {
 		{ "version", 0, 0, OptionArg.NONE, ref _show_version, "Display version number", null },
 		{ "list-resources", 0, 0, OptionArg.NONE, ref _list_resources, "Lists the resource ids available", null },
+		{ "image-base-dir", 0, 0, OptionArg.STRING, ref _image_base_dir, "The base directory to resolve relative image-path against (default is $XDG_DATA_HOME/avizo)", "PATH" },
 		{ "image-path", 0, 0, OptionArg.STRING, ref _image_path, "Use the image specified by the path", "PATH" },
 		{ "image-resource", 0, 0, OptionArg.STRING, ref _image_resource, "Use the image specified by the image resource id", "RESOURCE_ID" },
 		{ "progress", 0, 0, OptionArg.DOUBLE, ref _progress, "Sets the progress in the notification, allowed values range from 0 to 1", "DOUBLE" },
@@ -69,6 +71,19 @@ public class AvizoClient : GLib.Application
 
 	public override int command_line(ApplicationCommandLine command_line)
 	{
+		try
+		{
+			load_config();
+		}
+		catch (Error e)
+		{
+			if (!(e is KeyFileError.NOT_FOUND))
+			{
+				stderr.printf(@"avizo: Failed to load configuration file: $(e.message)\n");
+				return 1;
+			}
+		}
+
 		// this is an ugly workaround to deal with args being owned
 		string[] args = command_line.get_arguments();
 		string[] _args = new string[args.length];
@@ -88,10 +103,10 @@ public class AvizoClient : GLib.Application
 		}
 		catch (OptionError e)
 		{
-			print(@"$(e.message)\n");
-			print(@"Run '$(args[0]) --help' to see a full list of available command line options.\n");
+			stderr.printf(@"avizo: $(e.message)\n");
+			stderr.printf(@"Run '$(args[0]) --help' to see a full list of available command line options.\n");
 
-			return 0;
+			return 1;
 		}
 
 		if (_show_version)
@@ -119,7 +134,7 @@ public class AvizoClient : GLib.Application
 
 		if (_image_path != "")
 		{
-			_service.image_path = _image_path;
+			_service.image_path = Filename.canonicalize(_image_path, _image_base_dir);
 		}
 		else
 		{
@@ -153,6 +168,49 @@ public class AvizoClient : GLib.Application
 		_service.show(_time);
 
 		return 0;
+	}
+
+	private void load_config() throws KeyFileError, FileError
+	{
+		string[] search_dirs = {};
+		search_dirs += Environment.get_user_config_dir();
+		foreach (var dir in Environment.get_system_config_dirs())
+		{
+			search_dirs += dir;
+		}
+
+		string config_path;
+		var conf = new KeyFile();
+		conf.load_from_dirs("avizo/config.ini", search_dirs, out config_path, KeyFileFlags.NONE);
+
+		debug("Loading configuration from %s", config_path);
+
+		var group = conf.get_start_group();
+
+		// Copy key values from the config file into static variables of this class
+		// (e.g. `_width`) according to the mapping specified in the options array.
+		foreach (var entry in options)
+		{
+			if (entry.long_name == null || !conf.has_key(group, entry.long_name))
+			{
+				continue;
+			}
+			switch (entry.arg)
+			{
+				case OptionArg.DOUBLE:
+					*((double*) entry.arg_data) = conf.get_double(group, entry.long_name);
+					break;
+				case OptionArg.INT:
+					*((int*) entry.arg_data) = conf.get_integer(group, entry.long_name);
+					break;
+				case OptionArg.STRING:
+					var value = conf.get_string(group, entry.long_name);
+					*((void**) entry.arg_data) = (owned) value;
+					break;
+				default:
+					break;
+			}
+		}
 	}
 }
 

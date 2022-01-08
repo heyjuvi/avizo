@@ -4,6 +4,19 @@ Avizo is a simple notification daemon, mainly intended to be used for multimedia
 
 ![Screenshot of Avizo's volume notification](https://raw.githubusercontent.com/misterdanb/avizo/master/github/screenshot.png)
 
+## Configuration
+
+Avizo can be configured using the configuration file and CLI options.
+
+`avizo-client` looks for configuration file `avizo/config.ini` in the standard [XDG directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) `XDG_CONFIG_HOME` (defaults to `~/.config`) and `XDG_CONFIG_DIRS` (defaults to `/etc/xdg`), in that order.
+The first found file is used.
+Missing configuration file is not an error.
+
+The configuration file must be in INI format and should define keys in section named `default`.
+Names of the configuration keys correspond to the CLI options (e.g. `block-height`).
+
+Any configuration key can be overridden by corresponding CLI option (i.e. CLI options take precedence).
+
 ## Sway config
 
 ```
