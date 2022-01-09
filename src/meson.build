@@ -1,6 +1,7 @@
 glib_dep = dependency('glib-2.0')
 gtk_dep = dependency('gtk+-3.0')
 gobject_dep = dependency('gobject-2.0')
+gobject_introspection_dep = dependency('gobject-introspection-1.0')
 
 app_sources_service = files(
   'avizo_service.vala'
@@ -26,6 +27,7 @@ executable('avizo-service',
     glib_dep,
     gtk_dep,
     gobject_dep,
+    gobject_introspection_dep,
     meson.get_compiler('c').find_library('gtk-layer-shell'),
     meson.get_compiler('c').find_library('m', required : false)
   ],
@@ -38,6 +40,7 @@ executable('avizo-client',
     glib_dep,
     gtk_dep,
     gobject_dep,
+    gobject_introspection_dep,
   ],
   install: true,
 )
