@@ -21,8 +21,6 @@ interface AvizoService : GLib.Object
 
 public class AvizoClient : GLib.Application
 {
-	private static string VERSION = "1.0";
-
 	private AvizoService _service = null;
 
 	private static bool _show_version = false;
@@ -114,7 +112,7 @@ public class AvizoClient : GLib.Application
 
 		if (_show_version)
 		{
-			print(@"noti-client $VERSION)\n");
+			print(@"avizo-client $(Config.VERSION)\n");
 
 			return 0;
 		}
