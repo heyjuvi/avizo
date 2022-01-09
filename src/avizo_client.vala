@@ -114,7 +114,7 @@ public class AvizoClient : GLib.Application
 
 		if (_show_version)
 		{
-			print(@"noti-client $VERSION)\n");
+			print(@"avizo-client $(VERSION)\n");
 
 			return 0;
 		}
