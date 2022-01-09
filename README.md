@@ -57,6 +57,12 @@ exec "avizo-service"
 
 ## Install
 
+### From package repository
+
+Avizo is available in the following repositories:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/avizo.svg)](https://repology.org/project/avizo/versions)
+
 ### Manually
 
 ```
