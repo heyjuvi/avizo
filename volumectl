@@ -1,155 +1,162 @@
 #!/bin/sh
+#---help---
+# Usage:
+#   $0 [options] <command> [<value>[%]]
+#   $0 [options] (+|-)<value>%
+#   $0 [options] [=]<value>%
+#   $0 -h
+#
+# Adjust the sound or mic volume using 'pamixer' and show an on-screen
+# notification using 'avizo-client'.
+#
+# Commands:
+#   + | up           Increase the volume by <value> percents (defaults to 5).
+#   - | down         Decrease the volume by <value> percents (defaults to 5).
+#   = | set          Set volume to <value> percents.
+#   x | mute         Set mute.
+#   u | unmute       Unset mute.
+#   % | toggle-mute  Switch between mute and unmute.
+#
+# Options:
+#   -a               Use with mute, unmute or toggle-mute command to sync the
+#                      mute state of all sinks or sources with <device-id> or
+#                      the default device.
+#   -b               Allow volume to go above 100% (boost).
+#   -D <device-id>   Choose a different sink (output) or source (input) than
+#                      the default (see pamixer --list-sinks and --list-sources).
+#   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
+#   -m               Control the source (mic) instead of sink (output).
+#   -u               Unmute when changing the volume (+|-|=).
+#   -h --help        Show this message and exit.
+#
+# This script is part of the avizo package.
+#---help---
+# This script is POSIX Shell Command Language compliant.
+set -eu
 
-if [ -n "$VOLUME_DEBUG" ]; then
-    set -x
+if ( set -o pipefail 2>/dev/null ); then
+	set -o pipefail
 fi
 
-_current() {
-  CURRENT=$(pamixer --get-volume)
-}
-_is_muted() {
-  if [ "$(pamixer --get-mute)" = 'false' ]; then
-    OUT_MUTED='yes'
-  else
-    OUT_MUTED='no'
-  fi
-
-  IN_MUTED=$(pactl list sources|\
-    grep '^[[:space:]]\(Mute\|Name\)'|\
-    grep $DEF_SOURCE -A 1|\
-    grep Mute|\
-    awk -F": " '{print $2}')
-}
-
-AMOUNT="5%"
-TIME=1
-DEF_SOURCE=$(pactl info | grep "Default Source: " | awk -F": " '{print $2}')
-
-_maybe_unmute() {
-  _is_muted
-  if [ "$OUT_MUTED" = "yes" ]; then
-    pactl set-sink-mute @DEFAULT_SINK@ false
-  fi
-}
-
-_raise() {
-  _maybe_unmute
-  _current
-  if [ "$CURRENT" -lt 100 ]; then
-      pactl set-sink-volume @DEFAULT_SINK@ "+${AMOUNT}"
-  fi
-}
-
-_lower() {
-  _maybe_unmute
-  pactl set-sink-volume @DEFAULT_SINK@ "-${AMOUNT}"
-}
-
-_toggle_out_mute() {
-  pactl set-sink-mute @DEFAULT_SINK@ toggle
-}
-
-_toggle_in_mute() {
-  for SOURCE in $(pactl list short sources | grep -v monitor | cut -f1)
-  do
-    pactl set-source-mute $SOURCE toggle
-  done
-}
-
-_notify() {
-  local alpha="0.5"
-
-  _is_muted
-  _current
-  if [ "$1" = "out-mute" ] && [ "$OUT_MUTED" = "yes" ]
-  then
-      avizo-client --image-resource="volume_muted" --progress="0" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-  elif [ "$1" = "in-mute" ] && [ "$IN_MUTED" = "yes" ]
-  then
-      avizo-client --image-resource="mic_muted" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-  elif [ "$1" = "in-mute" ] && [ "$IN_MUTED" = "no" ]
-  then
-      avizo-client --image-resource="mic_unmuted" --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-  else
-      local scaled=$(echo "scale=2; $CURRENT / 100.0" | bc)
-
-      if [ "$CURRENT" -lt "34" ]
-      then
-          avizo-client --image-resource="volume_low" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-      elif [ "$CURRENT" -lt "67" ]
-      then
-          avizo-client --image-resource="volume_medium" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-      elif [ "$CURRENT" -lt "101" ]
-      then
-          avizo-client --image-resource="volume_high" --progress=$scaled --time=$TIME --background="rgba(255, 255, 255, $alpha)"
-      fi
-  fi
-}
-
-raise() {
-  _raise
-  _notify
-}
-
-lower() {
-  _lower
-  _notify
-}
-
-toggle_out_mute() {
-  _toggle_out_mute
-  _notify out-mute
-}
-
-toggle_in_mute() {
-  _toggle_in_mute
-  _notify in-mute
-}
+PROGNAME='volumectl'
 
 help() {
-  cat <<EOH
-$0 [COMMAND]
-Control the volume of the default sink and displays the current outcome.
-May also mute/unmute all the microphone inputs.
-
-COMMAND:
-    raise|+    --  raises the volume
-    lower|-  --  lowers the volume
-    mute|m  --  toggles the mute state
-                (defaults to output, use --mic to specify to mute the mic)
-EOH
+	local tag='---help---'
+	sed -n "/^#$tag/,/^#$tag/{/^#$tag/d; s/^# \\?//; s|\$0|$0|; p}" "$0"
 }
 
-case $1 in
-  raise|+)
-    raise
-    exit 0
-    ;;
-  lower|-)
-    lower
-    exit 0
-    ;;
-  mute|m)
-    shift
-    case $1 in
-      --mic)
-        toggle_in_mute
-        exit 0
-        ;;
-      *)
-        toggle_out_mute
-        exit 0
-        ;;
-    esac
-    ;;
-  help|-h|--help)
-    help
-    exit 0
-    ;;
-  *)
-    help
-    exit 1
-    ;;
+die() {
+	printf "$PROGNAME: %s\n" "$1" >&2
+	exit 1
+}
+
+is_integer() {
+	expr "$1" : '[0-9]\+$' >/dev/null
+}
+
+
+all_flag=false
+dev=
+dev_type='sink'
+opts=
+unmute_opt=
+optind=1
+while getopts ':abD:g:muh' OPT; do
+	case "$OPT" in
+		a) all_flag=true;;
+		b) opts="$opts --allow-boost";;
+		D) dev=$OPTARG;;
+		g) opts="$opts --gamma=$OPTARG";;
+		m) dev_type='source';;
+		u) unmute_opt='--unmute';;
+		h) help; exit 0;;
+		\?) case "$OPTARG" in
+		    	[0-9]*) break;;
+		    	*) die "unknown option: -$OPTARG";;
+		    esac
+		;;
+	esac
+	optind=$OPTIND  # hack to make -<value>% work correctly
+done
+shift $((optind -1))
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+	die "invalid number of arguments (see '$0 -h')"
+fi
+
+case "$1" in
+	[=+-][0-9]*%) cmd=${1%%[0-9]*}; value=${1#[=+-]};;
+	[0-9]*%) cmd='='; value=$1;;
+	*) cmd=$1; value=${2:-5};;
+esac
+value=${value%\%}
+
+if ! is_integer "$value"; then
+	die "invalid value: '$value'"
+fi
+
+# Note: 'raise' and 'lower' are only for backward compatibility with
+#  the previous version of this script.
+case "$cmd" in
+	+ | up | raise) cmd_opt="--increase=$value";;
+	- | down | lower) cmd_opt="--decrease=$value";;
+	= | set) cmd_opt="--set-volume=$value";;
+	x | mute) cmd_opt='--mute';;
+	u | unmute) cmd_opt='--unmute';;
+	% | toggle-mute) cmd_opt='--toggle-mute';;
+	*) die "invalid command: $cmd (see '$0 -h')";;
+esac
+case "$cmd_opt" in
+	*mute*) unmute_opt='';;
+	*) all_flag=false;;
 esac
 
-# vim:set et ts=2 sts=0 sw=0:
+dev_opt=
+if [ "$dev_type" = 'source' ] && [ -z "$dev" ]; then
+	dev_opt='--default-source'
+elif [ "$dev" ]; then
+	dev_opt="--$dev_type=$dev"
+fi
+
+
+pamixer $dev_opt $opts $unmute_opt $cmd_opt
+
+# Note: pamixer returns 1 when muted or volume is 0
+muted=$(pamixer $dev_opt --get-mute || :)
+volume=$(pamixer $dev_opt --get-volume || :)
+
+if ! is_integer "$volume"; then
+	die "pamixer returned invalid volume level: '$volume'"
+fi
+
+if $all_flag; then
+	[ "$muted" = 'true' ] && mute_opt='--mute' || mute_opt='--unmute'
+
+	for id in $(pamixer --list-${dev_type}s | grep -o '^[0-9]\+'); do
+		pamixer --$dev_type=$id $mute_opt || :
+	done
+fi
+
+case "$dev_type" in
+	sink)
+		if [ "$muted" = 'true' ]; then
+			image='volume_muted'
+		elif [ "$volume" -le 33 ]; then
+			image='volume_low'
+		elif [ "$volume" -le 66 ]; then
+			image='volume_medium'
+		else
+			image='volume_high'
+		fi
+	;;
+	source)
+		if [ "$muted" = 'true' ]; then
+			image='mic_muted'
+		else
+			image='mic_unmuted'
+		fi
+	;;
+esac
+
+progress=$(echo "$volume" | awk '{ printf "%.2f", ($1 > 100 ? 1 : $1 / 100) }')
+avizo-client --image-resource="$image" --progress="$progress"
