@@ -12,7 +12,9 @@ app_resources_service = gnome.compile_resources(
   source_dir : '.',
   c_name : 'avizo_resources')
 
-install_data('config.ini', install_dir: '/etc/xdg/avizo')
+sysconfdir = get_option('sysconfdir')
+
+install_data('config.ini', install_dir: join_paths(sysconfdir, 'xdg/avizo'))
 install_data('volumectl', install_dir: 'bin')
 install_data('lightctl', install_dir: 'bin')
 
