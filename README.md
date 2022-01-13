@@ -61,7 +61,7 @@ exec "avizo-service"
 
 Avizo is available in the following repositories:
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/avizo.svg)](https://repology.org/project/avizo/versions)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/avizo-notification-daemon.svg)](https://repology.org/project/avizo-notification-daemon/versions)
 
 ### Manually
 
