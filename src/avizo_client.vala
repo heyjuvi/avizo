@@ -15,7 +15,7 @@ interface AvizoService : GLib.Object
 	public abstract int block_spacing { owned get; set; }
 	public abstract int block_count { owned get; set; }
 	public abstract Gdk.RGBA background { owned get; set; }
-	public abstract Gdk.RGBA foreground { owned get; set; }
+	public abstract Gdk.RGBA bar_fg_color { owned get; set; }
 	public abstract Gdk.RGBA bar_bg_color { owned get; set; }
 
 	public abstract void show(double seconds) throws DBusError, IOError;
@@ -39,8 +39,8 @@ public class AvizoClient : GLib.Application
 	private static int _block_height = 10;
 	private static int _block_spacing = 2;
 	private static int _block_count = 20;
-	private static string _foreground = "";
 	private static string _background = "";
+	private static string _bar_fg_color = "";
 	private static string _bar_bg_color = "";
 
 	private static double _time = 5.0;
@@ -61,7 +61,8 @@ public class AvizoClient : GLib.Application
 		{ "block-spacing", 0, 0, OptionArg.INT, ref _block_spacing, "Sets the spacing between blocks in the progress indicator", "INT" },
 		{ "block-count", 0, 0, OptionArg.INT, ref _block_count, "Sets the amount of blocks in the progress indicator", "INT" },
 		{ "background", 0, 0, OptionArg.STRING, ref _background, "Sets the color of the notification background in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
-		{ "foreground", 0, 0, OptionArg.STRING, ref _foreground, "Sets the foreground color in the format rgba([0, 255], [0, 255], [0, 255], [0, 1]), note that this does not affect the image", "STRING" },
+		{ "foreground", 0, 0, OptionArg.STRING, ref _bar_fg_color, "Deprecated alias for --bar-fg-color", "STRING" },
+		{ "bar-fg-color", 0, 0, OptionArg.STRING, ref _bar_fg_color, "Sets the color of the filled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "bar-bg-color", 0, 0, OptionArg.STRING, ref _bar_bg_color, "Sets the color of the unfilled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "time", 0, 0, OptionArg.DOUBLE, ref _time, "Sets the time to show the notification, default is 5", "DOUBLE" },
 		{ null }
@@ -178,9 +179,9 @@ public class AvizoClient : GLib.Application
 			_service.bar_bg_color = parse_rgba(_bar_bg_color);
 		}
 
-		if (_foreground != "")
+		if (_bar_fg_color != "")
 		{
-			_service.foreground = parse_rgba(_foreground);
+			_service.bar_fg_color = parse_rgba(_bar_fg_color);
 		}
 
 		_service.show(_time);
