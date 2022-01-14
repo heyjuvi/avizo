@@ -116,10 +116,10 @@ public class AvizoWindow : Gtk.Window
 		draw_rect(ctx, 0, 0, _width, _height);
 
 		ctx.set_operator(Cairo.Operator.SOURCE);
-		ctx.set_source_rgba(background.red, background.green, background.blue, background.alpha);
+		Gdk.cairo_set_source_rgba(ctx, background);
 		draw_round_rect(ctx, 0, 0, _width, _height, 16);
 
-		ctx.set_source_rgba(bar_bg_color.red, bar_bg_color.green, bar_bg_color.blue, bar_bg_color.alpha);
+		Gdk.cairo_set_source_rgba(ctx, bar_bg_color);
 
 		for (int i = 0; i < block_count; i++)
 		{
@@ -129,7 +129,7 @@ public class AvizoWindow : Gtk.Window
 			               block_height);
 		}
 
-		ctx.set_source_rgba(foreground.red, foreground.green, foreground.blue, foreground.alpha);
+		Gdk.cairo_set_source_rgba(ctx, foreground);
 
 		for (int i = 0; i < (int) (block_count * progress); i++)
 		{
