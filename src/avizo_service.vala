@@ -26,6 +26,17 @@ public class AvizoWindow : Gtk.Window
 		}
 	}
 
+	public double image_opacity {
+		get
+		{
+			return image.opacity;
+		}
+		set
+		{
+			image.opacity = value;
+		}
+	}
+
 	public double progress { get; set; }
 
 	private int _width = 248;
@@ -67,22 +78,7 @@ public class AvizoWindow : Gtk.Window
 	public int block_count { get; set; }
 
 	public Gdk.RGBA background { get; set; default = Gdk.RGBA(); }
-
-	public Gdk.RGBA _foreground = Gdk.RGBA();
-	public Gdk.RGBA foreground
-	{
-		get
-		{
-			return _foreground;
-		}
-
-		set
-		{
-			_foreground = value;
-
-			image.opacity = double.min(1.0, _foreground.alpha * 2.0);
-		}
-	}
+	public Gdk.RGBA foreground { get; set; default = Gdk.RGBA(); }
 
 	public Gdk.RGBA bar_bg_color { get; set; default = Gdk.RGBA(); }
 
@@ -183,13 +179,14 @@ public class AvizoWindow : Gtk.Window
 public class AvizoService : GLib.Object
 {
 	private static string[] props = {
-		"image_path", "image_resource", "progress", "width", "height", "padding",
+		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding",
 		"block_height", "block_spacing", "block_count", "background", "foreground",
 		"bar_bg_color",
 	};
 
 	public string image_path { get; set; default = ""; }
 	public string image_resource { get; set; default = "volume_muted"; }
+	public double image_opacity { get; set; default = 1.0; }
 	public double progress { get; set; default = 0.0; }
 	public int width { get; set; default = 248; }
 	public int height { get; set; default = 232; }

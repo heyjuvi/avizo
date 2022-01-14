@@ -5,6 +5,7 @@ interface AvizoService : GLib.Object
 {
 	public abstract string image_path { owned get; set; }
 	public abstract string image_resource { owned get; set; }
+	public abstract double image_opacity { owned get; set; }
 	public abstract double progress { owned get; set; }
 	public abstract int width { owned get; set; }
 	public abstract int height { owned get; set; }
@@ -29,6 +30,7 @@ public class AvizoClient : GLib.Application
 	private static string _image_base_dir = @"$(Environment.get_user_data_dir())/avizo";
 	private static string _image_path = "";
 	private static string _image_resource = "volume_muted";
+	private static double _image_opacity = 1.0;
 	private static double _progress = 0.0;
 	private static int _width = 248;
 	private static int _height = 232;
@@ -49,6 +51,7 @@ public class AvizoClient : GLib.Application
 		{ "image-base-dir", 0, 0, OptionArg.STRING, ref _image_base_dir, "The base directory to resolve relative image-path against (default is $XDG_DATA_HOME/avizo)", "PATH" },
 		{ "image-path", 0, 0, OptionArg.STRING, ref _image_path, "Use the image specified by the path", "PATH" },
 		{ "image-resource", 0, 0, OptionArg.STRING, ref _image_resource, "Use the image specified by the image resource id", "RESOURCE_ID" },
+		{ "image-opacity", 0, 0, OptionArg.DOUBLE, ref _image_opacity, "Sets the image opacity, allowed values range from 0 (transparent) to 1.0 (opaque)", "DOUBLE" },
 		{ "progress", 0, 0, OptionArg.DOUBLE, ref _progress, "Sets the progress in the notification, allowed values range from 0 to 1", "DOUBLE" },
 		{ "width", 0, 0, OptionArg.INT, ref _width, "Sets the width of the notification", "INT" },
 		{ "height", 0, 0, OptionArg.INT, ref _height, "Sets the height of the notification", "INT" },
@@ -145,6 +148,7 @@ public class AvizoClient : GLib.Application
 			_service.image_resource = _image_resource;
 		}
 
+		_service.image_opacity = _image_opacity;
 		_service.progress = _progress;
 		_service.width = _width;
 		_service.height = _height;
