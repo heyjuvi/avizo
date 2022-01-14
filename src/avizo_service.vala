@@ -196,9 +196,9 @@ public class AvizoService : GLib.Object
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
-	public Gdk.RGBA background { get; set; default = rgba(255, 255, 255, 0.5); }
-	public Gdk.RGBA bar_fg_color { get; set; default = rgba(0, 0, 0, 0.5); }
-	public Gdk.RGBA bar_bg_color { get; set; default = rgba(170, 170, 170, 0.5); }
+	public Gdk.RGBA background { get; set; default = rgba(160, 160, 160, 0.8); }
+	public Gdk.RGBA bar_fg_color { get; set; default = rgba(0, 0, 0, 0.8); }
+	public Gdk.RGBA bar_bg_color { get; set; default = rgba(106, 106, 106, 0.8); }
 
 	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;
