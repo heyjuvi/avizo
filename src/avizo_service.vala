@@ -200,7 +200,7 @@ public class AvizoService : GLib.Object
 	public int block_count { get; set; default = 20; }
 	public Gdk.RGBA background { get; set; default = rgba(255, 255, 255, 0.5); }
 	public Gdk.RGBA foreground { get; set; default = rgba(0, 0, 0, 0.5); }
-	public Gdk.RGBA bar_bg_color { get; set; default = rgba(255, 255, 255, 0.33); }
+	public Gdk.RGBA bar_bg_color { get; set; default = rgba(170, 170, 170, 0.5); }
 
 	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;

@@ -162,9 +162,11 @@ public class AvizoClient : GLib.Application
 
 			if (_bar_bg_color == "")
 			{
-				var bar_bg = bg.copy();
-				bar_bg.alpha /= 1.5;
-				_service.bar_bg_color = bar_bg;
+				var bar_color = bg.copy();
+				bar_color.red /= 1.5;
+				bar_color.green /= 1.5;
+				bar_color.blue /= 1.5;
+				_service.bar_bg_color = bar_color;
 			}
 		}
 
