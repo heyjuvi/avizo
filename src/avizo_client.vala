@@ -156,13 +156,12 @@ public class AvizoClient : GLib.Application
 
 		if (_background != "")
 		{
-			Gdk.RGBA bg = Gdk.RGBA();
-			bg.parse(_background);
-			_service.background = bg;
+			var color = parse_rgba(_background);
+			_service.background = color;
 
 			if (_bar_bg_color == "")
 			{
-				var bar_color = bg.copy();
+				var bar_color = color.copy();
 				bar_color.red /= 1.5;
 				bar_color.green /= 1.5;
 				bar_color.blue /= 1.5;
@@ -172,18 +171,12 @@ public class AvizoClient : GLib.Application
 
 		if (_bar_bg_color != "")
 		{
-			Gdk.RGBA bg = Gdk.RGBA();
-			bg.parse(_bar_bg_color);
-
-			_service.bar_bg_color = bg;
+			_service.bar_bg_color = parse_rgba(_bar_bg_color);
 		}
 
 		if (_foreground != "")
 		{
-			Gdk.RGBA fg = Gdk.RGBA();
-			fg.parse(_foreground);
-
-			_service.foreground = fg;
+			_service.foreground = parse_rgba(_foreground);
 		}
 
 		_service.show(_time);
@@ -233,6 +226,18 @@ public class AvizoClient : GLib.Application
 			}
 		}
 	}
+}
+
+Gdk.RGBA parse_rgba(string value)
+{
+	var color = Gdk.RGBA();
+	if (!color.parse(value))
+	{
+		// Note: This terminates the process!
+		error("Invalid RGBA color value: %s", value);
+	}
+
+	return color;
 }
 
 public void main(string[] args)
