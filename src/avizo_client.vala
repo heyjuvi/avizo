@@ -15,6 +15,7 @@ interface AvizoService : GLib.Object
 	public abstract int block_count { owned get; set; }
 	public abstract Gdk.RGBA background { owned get; set; }
 	public abstract Gdk.RGBA foreground { owned get; set; }
+	public abstract Gdk.RGBA bar_bg_color { owned get; set; }
 
 	public abstract void show(double seconds) throws DBusError, IOError;
 }
@@ -38,6 +39,7 @@ public class AvizoClient : GLib.Application
 	private static int _block_count = 20;
 	private static string _foreground = "";
 	private static string _background = "";
+	private static string _bar_bg_color = "";
 
 	private static double _time = 5.0;
 
@@ -55,8 +57,9 @@ public class AvizoClient : GLib.Application
 		{ "block-height", 0, 0, OptionArg.INT, ref _block_height, "Sets the block height of the progress indicator", "INT" },
 		{ "block-spacing", 0, 0, OptionArg.INT, ref _block_spacing, "Sets the spacing between blocks in the progress indicator", "INT" },
 		{ "block-count", 0, 0, OptionArg.INT, ref _block_count, "Sets the amount of blocks in the progress indicator", "INT" },
-		{ "background", 0, 0, OptionArg.STRING, ref _background, "Sets the background color in the format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
+		{ "background", 0, 0, OptionArg.STRING, ref _background, "Sets the color of the notification background in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "foreground", 0, 0, OptionArg.STRING, ref _foreground, "Sets the foreground color in the format rgba([0, 255], [0, 255], [0, 255], [0, 1]), note that this does not affect the image", "STRING" },
+		{ "bar-bg-color", 0, 0, OptionArg.STRING, ref _bar_bg_color, "Sets the color of the unfilled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "time", 0, 0, OptionArg.DOUBLE, ref _time, "Sets the time to show the notification, default is 5", "DOUBLE" },
 		{ null }
 	};
@@ -155,8 +158,22 @@ public class AvizoClient : GLib.Application
 		{
 			Gdk.RGBA bg = Gdk.RGBA();
 			bg.parse(_background);
-
 			_service.background = bg;
+
+			if (_bar_bg_color == "")
+			{
+				var bar_bg = bg.copy();
+				bar_bg.alpha /= 1.5;
+				_service.bar_bg_color = bar_bg;
+			}
+		}
+
+		if (_bar_bg_color != "")
+		{
+			Gdk.RGBA bg = Gdk.RGBA();
+			bg.parse(_bar_bg_color);
+
+			_service.bar_bg_color = bg;
 		}
 
 		if (_foreground != "")

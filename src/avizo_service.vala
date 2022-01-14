@@ -84,6 +84,8 @@ public class AvizoWindow : Gtk.Window
 		}
 	}
 
+	public Gdk.RGBA bar_bg_color { get; set; default = Gdk.RGBA(); }
+
 	[GtkChild]
 	private unowned Gtk.Image image;
 
@@ -117,7 +119,7 @@ public class AvizoWindow : Gtk.Window
 		ctx.set_source_rgba(background.red, background.green, background.blue, background.alpha);
 		draw_round_rect(ctx, 0, 0, _width, _height, 16);
 
-		ctx.set_source_rgba(background.red, background.green, background.blue, background.alpha / 1.5);
+		ctx.set_source_rgba(bar_bg_color.red, bar_bg_color.green, bar_bg_color.blue, bar_bg_color.alpha);
 
 		for (int i = 0; i < block_count; i++)
 		{
@@ -183,6 +185,7 @@ public class AvizoService : GLib.Object
 	private static string[] props = {
 		"image_path", "image_resource", "progress", "width", "height", "padding",
 		"block_height", "block_spacing", "block_count", "background", "foreground",
+		"bar_bg_color",
 	};
 
 	public string image_path { get; set; default = ""; }
@@ -197,6 +200,7 @@ public class AvizoService : GLib.Object
 	public int block_count { get; set; default = 20; }
 	public Gdk.RGBA background { get; set; default = rgba(255, 255, 255, 0.5); }
 	public Gdk.RGBA foreground { get; set; default = rgba(0, 0, 0, 0.5); }
+	public Gdk.RGBA bar_bg_color { get; set; default = rgba(255, 255, 255, 0.33); }
 
 	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;
