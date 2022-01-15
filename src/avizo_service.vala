@@ -186,7 +186,7 @@ public class AvizoService : GLib.Object
 	};
 
 	public string image_path { get; set; default = ""; }
-	public string image_resource { get; set; default = "volume_muted"; }
+	public string image_resource { get; set; default = ""; }
 	public double progress { get; set; default = 0.0; }
 	public int width { get; set; default = 248; }
 	public int height { get; set; default = 232; }
