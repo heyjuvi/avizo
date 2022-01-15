@@ -72,6 +72,7 @@ public class AvizoWindow : Gtk.Window
 	}
 
 	public int padding { get; set; }
+	public int border_radius { get; set; }
 
 	public int block_height { get; set; }
 	public int block_spacing { get; set; }
@@ -112,7 +113,7 @@ public class AvizoWindow : Gtk.Window
 
 		ctx.set_operator(Cairo.Operator.SOURCE);
 		Gdk.cairo_set_source_rgba(ctx, background);
-		draw_round_rect(ctx, 0, 0, _width, _height, 16);
+		draw_round_rect(ctx, 0, 0, _width, _height, border_radius);
 
 		Gdk.cairo_set_source_rgba(ctx, bar_bg_color);
 
@@ -179,8 +180,8 @@ public class AvizoService : GLib.Object
 {
 	private static string[] props = {
 		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding",
-		"block_height", "block_spacing", "block_count", "background", "bar_fg_color",
-		"bar_bg_color",
+		"border_radius", "block_height", "block_spacing", "block_count", "background",
+		"bar_fg_color", "bar_bg_color",
 	};
 
 	public string image_path { get; set; default = ""; }
@@ -191,6 +192,7 @@ public class AvizoService : GLib.Object
 	public int height { get; set; default = 232; }
 	public int padding { get; set; default = 24; }
 	public double y_offset { get; set; default = 0.75; }
+	public int border_radius { get; set; default = 16; }
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
