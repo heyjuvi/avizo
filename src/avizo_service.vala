@@ -270,12 +270,12 @@ public class AvizoService : GLib.Object
 	}
 }
 
-Gdk.RGBA rgba(double red, double green, double blue, double alpha)
+Gdk.RGBA rgba(int red, int green, int blue, double alpha)
 {
 	var o = Gdk.RGBA();
-	o.red = red;
-	o.green = green;
-	o.blue = blue;
+	o.red = red / 255.0;
+	o.green = green / 255.0;
+	o.blue = blue / 255.0;
 	o.alpha = alpha;
 	return o;
 }
