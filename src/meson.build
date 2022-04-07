@@ -30,6 +30,11 @@ sources_client = [
   app_sources_client
 ]
 
+gtk_layer_shell = dependency('gtk-layer-shell-0', fallback: ['gtk-layer-shell'])
+if gtk_layer_shell.version() >= '0.6.0'
+  add_project_arguments('-D', 'HAVE_LATEST_GTK_LAYER_SHELL', language: 'vala')
+endif
+
 executable('avizo-service',
   sources_service,
   vala_args: ['--pkg=GtkLayerShell-0.1'],
