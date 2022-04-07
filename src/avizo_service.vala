@@ -280,6 +280,7 @@ public class AvizoService : GLib.Object
 			window.get_position(out x, out _y);
 			window.move(x, margin);
 			window.set_type_hint(Gdk.WindowTypeHint.NOTIFICATION);
+			window.set_accept_focus(false);
 		}
 
 		window.show();
