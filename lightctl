@@ -40,6 +40,10 @@ is_integer() {
 	expr "$1" : '[0-9]\+$' >/dev/null
 }
 
+is_float() {
+	expr "$1" : '[0-9]\+\.[0-9]\+$' >/dev/null
+}
+
 exp=
 dev=
 optind=1
@@ -104,8 +108,12 @@ else
 	die 'command not found: brightnessctl or light'
 fi
 
-if ! is_integer "$light"; then
+if ! is_integer "$light" && ! is_float "$light"; then
 	die "$prog returned invalid brigtness: '$light'"
+fi
+
+if is_float "$light"; then
+    light=${light/.*}
 fi
 
 if [ "$light" -le 33 ]; then
