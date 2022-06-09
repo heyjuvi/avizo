@@ -1,5 +1,5 @@
 project('avizo', 'c', 'vala',
-        version: '1.1',
+        version: '1.2.1',
         license: 'GPLv3+')
 
 add_project_arguments(['--target-glib=2.38'],
