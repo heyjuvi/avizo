@@ -29,6 +29,7 @@ Adjust the sound or mic volume and show Avizo notification.
 * POSIX-sh compatible shell (e.g. Busybox ash, dash, ZSH, bash, …)
 * common \*nix userland (BSD, Busybox or GNU)
 * [pamixer](https://github.com/cdemoulins/pamixer)
+* [pactl](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/CLI/#pactl), PulseAudio's Command Line Interface utility, for the optional tracking of the currently playing sink 
 
 ### lightctl
 

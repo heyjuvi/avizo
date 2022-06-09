@@ -122,8 +122,9 @@ if [ "$dev_type" = 'source' ] && [ -z "$dev" ]; then
 elif [ "$dev" ]; then
 	dev_opt="--$dev_type=$dev"
 elif [ "$dev_type" = 'sink' ] && [ "$use_playing" ]; then
-	dev=$(pactl list short sinks | grep RUNNING | cut -f 2 | head -n 1)
-	dev_opt="--$dev_type=$dev"
+	if dev=$(pactl list short sinks | grep RUNNING | cut -f 2 | head -n 1) && [ "$dev" ]; then
+		dev_opt="--$dev_type=$dev"
+	fi
 fi
 
 
