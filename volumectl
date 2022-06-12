@@ -26,7 +26,7 @@
 #                      the default (see pamixer --list-sinks and --list-sources).
 #   -p               Choose the currently playing sink (or source) instead of
 #                      the default. In case of multiple playing sinks/sources,
-#                      it will choose the first one as reported by 'pactl'.
+#                      it will choose the first one as reported by pactl/pamixer.
 #   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
 #   -m               Control the source (mic) instead of sink (output).
 #   -u               Unmute when changing the volume (+|-|=).
@@ -55,6 +55,14 @@ die() {
 
 is_integer() {
 	expr "$1" : '[0-9]\+$' >/dev/null
+}
+
+playing_dev_id() {
+	if command -v pactl >/dev/null; then
+		pactl list short ${1}s | grep RUNNING | grep -m1 -o '^[0-9]\+'
+	else  # this works since pamixer 1.6
+		pamixer --list-${1}s | grep '"Running"' | grep -m1 -o '^[0-9]\+'
+	fi
 }
 
 
@@ -121,7 +129,7 @@ if [ "$dev_type" = 'source' ] && [ -z "$dev" ]; then
 	dev_opt='--default-source'
 elif [ "$dev" ]; then
 	dev_opt="--$dev_type=$dev"
-elif $use_playing && id=$(pactl list short ${dev_type}s | grep RUNNING | grep -m1 -o '^[0-9]\+'); then
+elif $use_playing && id=$(playing_dev_id "$dev_type"); then
 	dev_opt="--$dev_type=$id"
 fi
 
