@@ -1,6 +1,9 @@
 using Gtk;
 using GtkLayerShell;
 
+[CCode (cname = "gdk_wayland_display_get_type")]
+extern Type get_wayland_type();
+
 [GtkTemplate (ui = "/org/danb/avizo/ui/avizo.ui")]
 public class AvizoWindow : Gtk.Window
 {
@@ -218,7 +221,7 @@ public class AvizoService : GLib.Object
 			var window = _windows.index(i);
 			if (window == null)
 			{
-				window = create_window();
+				window = create_window(display);
 				_windows.insert_val(i, window);
 			}
 			show_window(window, display.get_monitor(i));
@@ -240,7 +243,7 @@ public class AvizoService : GLib.Object
 		});
 	}
 
-	private AvizoWindow create_window()
+	private AvizoWindow create_window(Gdk.Display display)
 	{
 		var window = new AvizoWindow();
 
@@ -249,29 +252,49 @@ public class AvizoService : GLib.Object
 			bind_property(prop_name, window, prop_name, BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
 		}
 
-		GtkLayerShell.init_for_window(window);
-		GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
-		GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
-		GtkLayerShell.set_exclusive_zone(window, -1);
+		if (is_wayland(display))
+		{
+		  GtkLayerShell.init_for_window(window);
+		  GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
+		  GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
+		  GtkLayerShell.set_exclusive_zone(window, -1);
 #if HAVE_LATEST_GTK_LAYER_SHELL
-		GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE);
+		  GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE);
 #else
-		GtkLayerShell.set_keyboard_interactivity(window, false);
+		  GtkLayerShell.set_keyboard_interactivity(window, false);
 #endif
+    }
 
 		return window;
 	}
 
 	private void show_window(AvizoWindow window, Gdk.Monitor monitor)
 	{
-		GtkLayerShell.set_monitor(window, monitor);
-
 		var margin = (int) Math.lround((monitor.workarea.height - height) * y_offset);
-		GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, margin);
+
+		if (is_wayland(monitor.get_display()))
+		{
+			GtkLayerShell.set_monitor(window, monitor);
+			GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, margin);
+		}
+		else
+		{
+			int x, _y;
+			window.set_position(Gtk.WindowPosition.CENTER);
+			window.get_position(out x, out _y);
+			window.move(x, margin);
+			window.set_type_hint(Gdk.WindowTypeHint.NOTIFICATION);
+			window.set_accept_focus(false);
+		}
 
 		window.show();
 		window.queue_draw();
 	}
+}
+
+bool is_wayland(Gdk.Display? display)
+{
+	return display != null && display.get_type().is_a(get_wayland_type());
 }
 
 Gdk.RGBA rgba(int red, int green, int blue, double alpha)
