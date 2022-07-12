@@ -254,12 +254,16 @@ public class AvizoService : GLib.Object
 
 		if (is_wayland(display))
 		{
-			GtkLayerShell.init_for_window(window);
-			GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
-			GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
-			GtkLayerShell.set_exclusive_zone(window, -1);
-			GtkLayerShell.set_keyboard_interactivity(window, false);
-		}
+		  GtkLayerShell.init_for_window(window);
+		  GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
+		  GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
+		  GtkLayerShell.set_exclusive_zone(window, -1);
+#if HAVE_LATEST_GTK_LAYER_SHELL
+		  GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE);
+#else
+		  GtkLayerShell.set_keyboard_interactivity(window, false);
+#endif
+    }
 
 		return window;
 	}

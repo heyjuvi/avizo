@@ -24,10 +24,13 @@
 #   -b               Allow volume to go above 100% (boost).
 #   -D <device-id>   Choose a different sink (output) or source (input) than
 #                      the default (see pamixer --list-sinks and --list-sources).
+#   -p               Choose the currently playing sink instead of the default.
+#                      In case of multiple playing sinks, it will choose the
+#                      first playing  sink as reported by 'pactl'.
 #   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
 #   -m               Control the source (mic) instead of sink (output).
 #   -u               Unmute when changing the volume (+|-|=).
-#   -h --help        Show this message and exit.
+#   -h               Show this message and exit.
 #
 # This script is part of the avizo package.
 #---help---
@@ -58,14 +61,16 @@ is_integer() {
 all_flag=false
 dev=
 dev_type='sink'
+use_playing=
 opts=
 unmute_opt=
 optind=1
-while getopts ':abD:g:muh' OPT; do
+while getopts ':abD:pg:muh' OPT; do
 	case "$OPT" in
 		a) all_flag=true;;
 		b) opts="$opts --allow-boost";;
 		D) dev=$OPTARG;;
+		p) use_playing=true;;
 		g) opts="$opts --gamma=$OPTARG";;
 		m) dev_type='source';;
 		u) unmute_opt='--unmute';;
@@ -116,6 +121,10 @@ if [ "$dev_type" = 'source' ] && [ -z "$dev" ]; then
 	dev_opt='--default-source'
 elif [ "$dev" ]; then
 	dev_opt="--$dev_type=$dev"
+elif [ "$dev_type" = 'sink' ] && [ "$use_playing" ]; then
+	if dev=$(pactl list short sinks | grep RUNNING | cut -f 2 | head -n 1) && [ "$dev" ]; then
+		dev_opt="--$dev_type=$dev"
+	fi
 fi
 
 
