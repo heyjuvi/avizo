@@ -16,6 +16,8 @@ interface AvizoService : GLib.Object
 	public abstract int block_height { owned get; set; }
 	public abstract int block_spacing { owned get; set; }
 	public abstract int block_count { owned get; set; }
+	public abstract double fade_in { owned get; set; }
+	public abstract double fade_out { owned get; set; }
 	public abstract Gdk.RGBA background { owned get; set; }
 	public abstract Gdk.RGBA border_color { owned get; set; }
 	public abstract Gdk.RGBA bar_fg_color { owned get; set; }
@@ -44,6 +46,8 @@ public class AvizoClient : GLib.Application
 	private static int _block_height = 10;
 	private static int _block_spacing = 2;
 	private static int _block_count = 20;
+	private static double _fade_in = 0.2;
+	private static double _fade_out = 0.5;
 	private static string _background = "";
 	private static string _border_color = "";
 	private static string _bar_fg_color = "";
@@ -68,6 +72,8 @@ public class AvizoClient : GLib.Application
 		{ "block-height", 0, 0, OptionArg.INT, ref _block_height, "Sets the block height of the progress indicator", "INT" },
 		{ "block-spacing", 0, 0, OptionArg.INT, ref _block_spacing, "Sets the spacing between blocks in the progress indicator", "INT" },
 		{ "block-count", 0, 0, OptionArg.INT, ref _block_count, "Sets the amount of blocks in the progress indicator", "INT" },
+		{ "fade-in", 0, 0, OptionArg.DOUBLE, ref _fade_in, "Sets the fade in animation duration in seconds", "DOUBLE" },
+		{ "fade-out", 0, 0, OptionArg.DOUBLE, ref _fade_out, "Sets the fade out animation duration in seconds", "DOUBLE" },
 		{ "background", 0, 0, OptionArg.STRING, ref _background, "Sets the color of the notification background in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "border-color", 0, 0, OptionArg.STRING, ref _border_color, "Sets the color of the notification border in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "foreground", 0, 0, OptionArg.STRING, ref _bar_fg_color, "Deprecated alias for --bar-fg-color", "STRING" },
@@ -169,6 +175,9 @@ public class AvizoClient : GLib.Application
 		_service.block_height = _block_height;
 		_service.block_spacing = _block_spacing;
 		_service.block_count = _block_count;
+
+		_service.fade_in = _fade_in;
+		_service.fade_out = _fade_out;
 
 		if (_background != "")
 		{

@@ -82,10 +82,18 @@ public class AvizoWindow : Gtk.Window
 	public int block_spacing { get; set; }
 	public int block_count { get; set; }
 
+	public double fade_in { get; set; }
+	public double fade_out { get; set; }
+
 	public Gdk.RGBA background { get; set; default = Gdk.RGBA(); }
 	public Gdk.RGBA border_color { get; set; default = Gdk.RGBA(); }
 	public Gdk.RGBA bar_fg_color { get; set; default = Gdk.RGBA(); }
 	public Gdk.RGBA bar_bg_color { get; set; default = Gdk.RGBA(); }
+
+	private new double opacity = 0;
+	private bool is_fade_in = true;
+	private int64 prev_frame_time = 0;
+	private uint prev_callback_id = 0;
 
 	[GtkChild]
 	private unowned Gtk.Image image;
@@ -100,6 +108,69 @@ public class AvizoWindow : Gtk.Window
 		}
 
 		draw.connect(on_draw);
+	}
+
+	public void show_animated()
+	{
+		remove_tick_callback(prev_callback_id);
+		is_fade_in = true;
+		prev_callback_id = add_tick_callback(animation_tick);
+		show();
+	}
+
+	public void hide_animated()
+	{
+		remove_tick_callback(prev_callback_id);
+		is_fade_in = false;
+		prev_callback_id = add_tick_callback(animation_tick);
+	}
+
+	private bool animation_tick(Gtk.Widget widget, Gdk.FrameClock frame_clock)
+	{
+		frame_clock.begin_updating();
+		int64 animation_us_elapsed;
+		if (prev_frame_time == 0)
+		{
+			animation_us_elapsed = 0;
+		}
+		else {
+
+			animation_us_elapsed = (frame_clock.get_frame_time() - prev_frame_time);
+		}
+		prev_frame_time = frame_clock.get_frame_time();
+		var animation_sec_elapsed = (double)animation_us_elapsed / 1000000;
+		//var animation_sec_elapsed = (double)us_elapsed(frame_clock) / 1000000;
+		//print("ms elapsed: %lld, sec elapsed: %f, fade in : %f, fade out: %f\n", animation_us_elapsed / 1000, animation_sec_elapsed, fade_in, fade_out);
+		if (is_fade_in)
+		{
+			if (opacity >= 1)
+			{
+				prev_frame_time = 0;
+				frame_clock.end_updating();
+				return false;
+			}
+			opacity += animation_sec_elapsed/fade_in;
+			if (opacity > 1) opacity = 1;
+			print("Fade in: %f\n", opacity);
+			widget.set_opacity(opacity);
+		}
+		else
+		{
+			if (opacity <= 0)
+			{
+				hide();
+				prev_frame_time = 0;
+				frame_clock.end_updating();
+				return false;
+			}
+			opacity -= animation_sec_elapsed/fade_out;
+			if (opacity < 0) opacity = 0;
+			print("Fade out: %f\n", opacity);
+			widget.set_opacity(opacity);
+		}
+
+		frame_clock.end_updating();
+		return true; // Keep going
 	}
 
 	private bool on_draw(Gtk.Widget widget, Cairo.Context ctx)
@@ -199,7 +270,7 @@ public class AvizoService : GLib.Object
 {
 	private static string[] props = {
 		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding",
-		"border_radius", "border_width", "block_height", "block_spacing", "block_count", "background", "border_color",
+		"border_radius", "border_width", "block_height", "block_spacing", "block_count", "fade_in", "fade_out", "background", "border_color",
 		"bar_fg_color", "bar_bg_color",
 	};
 
@@ -216,6 +287,8 @@ public class AvizoService : GLib.Object
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
+	public double fade_in { get; set; default = 0.2; }
+	public double fade_out { get; set; default = 0.5; }
 	public Gdk.RGBA background { get; set; default = rgba(160, 160, 160, 0.8); }
 	public Gdk.RGBA border_color { get; set; default = rgba(90, 90, 90, 0.8); }
 	public Gdk.RGBA bar_fg_color { get; set; default = rgba(0, 0, 0, 0.8); }
@@ -253,7 +326,7 @@ public class AvizoService : GLib.Object
 			if (_open_timeouts == 0)
 			{
 				for (int i = 0; i < monitors; i++) {
-					_windows.index(i).hide();
+					_windows.index(i).hide_animated();
 				}
 			}
 
@@ -305,7 +378,7 @@ public class AvizoService : GLib.Object
 			window.set_accept_focus(false);
 		}
 
-		window.show();
+		window.show_animated();
 		window.queue_draw();
 	}
 }
