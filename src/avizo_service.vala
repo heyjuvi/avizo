@@ -326,7 +326,7 @@ public void main(string[] args)
 	Bus.own_name(BusType.SESSION, "org.danb.avizo.service", BusNameOwnerFlags.NONE,
 	             on_bus_aquired,
 	             () => {},
-	             () => stderr.printf("Could not aquire name\n"));
+	             () => stderr.printf("Could not acquire name\n"));
 
 	new AvizoService();
 
