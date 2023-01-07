@@ -76,14 +76,24 @@ public class AvizoWindow : Gtk.Window
 
 	public int padding { get; set; }
 	public int border_radius { get; set; }
+	public new int border_width { get; set; }
 
 	public int block_height { get; set; }
 	public int block_spacing { get; set; }
 	public int block_count { get; set; }
 
+	public double fade_in { get; set; }
+	public double fade_out { get; set; }
+
 	public Gdk.RGBA background { get; set; default = Gdk.RGBA(); }
+	public Gdk.RGBA border_color { get; set; default = Gdk.RGBA(); }
 	public Gdk.RGBA bar_fg_color { get; set; default = Gdk.RGBA(); }
 	public Gdk.RGBA bar_bg_color { get; set; default = Gdk.RGBA(); }
+
+	private new double opacity = 0;
+	private bool is_fade_in = true;
+	private int64 prev_frame_time = 0;
+	private uint prev_callback_id = 0;
 
 	[GtkChild]
 	private unowned Gtk.Image image;
@@ -100,13 +110,76 @@ public class AvizoWindow : Gtk.Window
 		draw.connect(on_draw);
 	}
 
+	public void show_animated()
+	{
+		remove_tick_callback(prev_callback_id);
+		is_fade_in = true;
+		prev_callback_id = add_tick_callback(animation_tick);
+		show();
+	}
+
+	public void hide_animated()
+	{
+		remove_tick_callback(prev_callback_id);
+		is_fade_in = false;
+		prev_callback_id = add_tick_callback(animation_tick);
+	}
+
+	private bool animation_tick(Gtk.Widget widget, Gdk.FrameClock frame_clock)
+	{
+		frame_clock.begin_updating();
+		int64 animation_us_elapsed;
+		if (prev_frame_time == 0)
+		{
+			animation_us_elapsed = 0;
+		}
+		else {
+
+			animation_us_elapsed = (frame_clock.get_frame_time() - prev_frame_time);
+		}
+		prev_frame_time = frame_clock.get_frame_time();
+		var animation_sec_elapsed = (double)animation_us_elapsed / 1000000;
+		//var animation_sec_elapsed = (double)us_elapsed(frame_clock) / 1000000;
+		//print("ms elapsed: %lld, sec elapsed: %f, fade in : %f, fade out: %f\n", animation_us_elapsed / 1000, animation_sec_elapsed, fade_in, fade_out);
+		if (is_fade_in)
+		{
+			if (opacity >= 1)
+			{
+				prev_frame_time = 0;
+				frame_clock.end_updating();
+				return false;
+			}
+			opacity += animation_sec_elapsed/fade_in;
+			if (opacity > 1) opacity = 1;
+			print("Fade in: %f\n", opacity);
+			widget.set_opacity(opacity);
+		}
+		else
+		{
+			if (opacity <= 0)
+			{
+				hide();
+				prev_frame_time = 0;
+				frame_clock.end_updating();
+				return false;
+			}
+			opacity -= animation_sec_elapsed/fade_out;
+			if (opacity < 0) opacity = 0;
+			print("Fade out: %f\n", opacity);
+			widget.set_opacity(opacity);
+		}
+
+		frame_clock.end_updating();
+		return true; // Keep going
+	}
+
 	private bool on_draw(Gtk.Widget widget, Cairo.Context ctx)
 	{
-		double block_width = (_width - 2 * padding -
+		double block_width = (_width - 2 * padding - 2 * border_width -
 		                      (double) ((block_count - 1) * block_spacing)) / block_count;
 
-		double blocks_x = padding;
-		double blocks_y = _height - padding - block_height;
+		double blocks_x = padding + border_width;
+		double blocks_y = _height - padding - border_width - block_height;
 
 		ctx.set_operator(Cairo.Operator.SOURCE);
 		ctx.paint();
@@ -115,8 +188,11 @@ public class AvizoWindow : Gtk.Window
 		draw_rect(ctx, 0, 0, _width, _height);
 
 		ctx.set_operator(Cairo.Operator.SOURCE);
-		Gdk.cairo_set_source_rgba(ctx, background);
+		Gdk.cairo_set_source_rgba(ctx, border_color);
 		draw_round_rect(ctx, 0, 0, _width, _height, border_radius);
+
+		Gdk.cairo_set_source_rgba(ctx, background);
+		draw_round_rect(ctx, border_width, border_width, _width - 2 * border_width, _height - 2 * border_width, border_radius - border_width);
 
 		Gdk.cairo_set_source_rgba(ctx, bar_bg_color);
 
@@ -130,12 +206,23 @@ public class AvizoWindow : Gtk.Window
 
 		Gdk.cairo_set_source_rgba(ctx, bar_fg_color);
 
-		for (int i = 0; i < (int) (block_count * progress); i++)
+		if (block_spacing > 0)
 		{
-			draw_rect(ctx, blocks_x + (block_width + block_spacing) * i,
-			               blocks_y,
-			               block_width,
-			               block_height);
+			for (int i = 0; i < (int) (block_count * progress); i++)
+			{
+				draw_rect(ctx, blocks_x + (block_width + block_spacing) * i,
+							blocks_y,
+							block_width,
+							block_height);
+			}
+		}
+		else {
+			var width = block_width * block_count * progress;
+			var height = block_height;
+			draw_rect(ctx, blocks_x,
+						blocks_y,
+						width,
+						height);
 		}
 
 		ctx.set_operator(Cairo.Operator.OVER);
@@ -183,7 +270,7 @@ public class AvizoService : GLib.Object
 {
 	private static string[] props = {
 		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding",
-		"border_radius", "block_height", "block_spacing", "block_count", "background",
+		"border_radius", "border_width", "block_height", "block_spacing", "block_count", "fade_in", "fade_out", "background", "border_color",
 		"bar_fg_color", "bar_bg_color",
 	};
 
@@ -196,10 +283,14 @@ public class AvizoService : GLib.Object
 	public int padding { get; set; default = 24; }
 	public double y_offset { get; set; default = 0.75; }
 	public int border_radius { get; set; default = 16; }
+	public int border_width { get; set; default = 1; }
 	public int block_height { get; set; default = 10; }
 	public int block_spacing { get; set; default = 2; }
 	public int block_count { get; set; default = 20; }
+	public double fade_in { get; set; default = 0.2; }
+	public double fade_out { get; set; default = 0.5; }
 	public Gdk.RGBA background { get; set; default = rgba(160, 160, 160, 0.8); }
+	public Gdk.RGBA border_color { get; set; default = rgba(90, 90, 90, 0.8); }
 	public Gdk.RGBA bar_fg_color { get; set; default = rgba(0, 0, 0, 0.8); }
 	public Gdk.RGBA bar_bg_color { get; set; default = rgba(106, 106, 106, 0.8); }
 
@@ -235,7 +326,7 @@ public class AvizoService : GLib.Object
 			if (_open_timeouts == 0)
 			{
 				for (int i = 0; i < monitors; i++) {
-					_windows.index(i).hide();
+					_windows.index(i).hide_animated();
 				}
 			}
 
@@ -287,7 +378,7 @@ public class AvizoService : GLib.Object
 			window.set_accept_focus(false);
 		}
 
-		window.show();
+		window.show_animated();
 		window.queue_draw();
 	}
 }
