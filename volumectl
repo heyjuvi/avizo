@@ -30,6 +30,7 @@
 #   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
 #   -m               Control the source (mic) instead of sink (output).
 #   -u               Unmute when changing the volume (+|-|=).
+#   -d               Show dark theme friendly variant of the icon
 #   -h               Show this message and exit.
 #
 # This script is part of the avizo package.

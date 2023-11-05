@@ -17,6 +17,7 @@
 # Options:
 #   -e <exponent>   Change percentage curve to exponential (only for brightnessctl).
 #   -D <device>     Specify the device name.
+#   -d              Show dark theme friendly variant of the icon
 #   -h              Show this message and exit.
 #
 # This script is part of the avizo package.
