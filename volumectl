@@ -74,7 +74,7 @@ opts=
 unmute_opt=
 optind=1
 dark=0
-while getopts ':abD:pg:muh:d' OPT; do
+while getopts ':adbD:pg:muh' OPT; do
 	case "$OPT" in
 		a) all_flag=true;;
 		b) opts="$opts --allow-boost";;
