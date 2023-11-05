@@ -47,11 +47,13 @@ is_float() {
 exp=
 dev=
 optind=1
-while getopts ':e:D:h' OPT; do
+dark=0
+while getopts ':e:D:h:d' OPT; do
 	case "$OPT" in
 		e) exp=$OPTARG;;
 		D) dev=$OPTARG;;
 		h) help; exit 0;;
+                d) dark=1;;
 		\?) case "$OPTARG" in
 		    	[0-9]*) break;;
 		    	*) die "unknown option: -$OPTARG";;
@@ -122,6 +124,10 @@ elif [ "$light" -le 66 ]; then
 	image='brightness_medium'
 else
 	image='brightness_high'
+fi
+
+if [ "$dark" -eq 1 ]; then
+    image="${image}_dark"
 fi
 
 progress=$(echo "$light" | awk '{ printf "%.2f", $1 / 100 }')
