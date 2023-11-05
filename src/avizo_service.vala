@@ -29,7 +29,8 @@ public class AvizoWindow : Gtk.Window
 		}
 	}
 
-	public double image_opacity {
+	public double image_opacity
+	{
 		get
 		{
 			return image.opacity;
@@ -133,10 +134,11 @@ public class AvizoWindow : Gtk.Window
 		{
 			animation_us_elapsed = 0;
 		}
-		else {
-
+		else
+		{
 			animation_us_elapsed = (frame_clock.get_frame_time() - prev_frame_time);
 		}
+
 		prev_frame_time = frame_clock.get_frame_time();
 		var animation_sec_elapsed = (double)animation_us_elapsed / 1000000;
 		//var animation_sec_elapsed = (double)us_elapsed(frame_clock) / 1000000;
@@ -149,8 +151,13 @@ public class AvizoWindow : Gtk.Window
 				frame_clock.end_updating();
 				return false;
 			}
-			opacity += animation_sec_elapsed/fade_in;
-			if (opacity > 1) opacity = 1;
+
+			opacity += animation_sec_elapsed / fade_in;
+			if (opacity > 1)
+			{
+				opacity = 1;
+			}
+
 			print("Fade in: %f\n", opacity);
 			widget.set_opacity(opacity);
 		}
@@ -163,8 +170,13 @@ public class AvizoWindow : Gtk.Window
 				frame_clock.end_updating();
 				return false;
 			}
-			opacity -= animation_sec_elapsed/fade_out;
-			if (opacity < 0) opacity = 0;
+
+			opacity -= animation_sec_elapsed / fade_out;
+			if (opacity < 0)
+			{
+				opacity = 0;
+			}
+
 			print("Fade out: %f\n", opacity);
 			widget.set_opacity(opacity);
 		}
@@ -211,18 +223,19 @@ public class AvizoWindow : Gtk.Window
 			for (int i = 0; i < (int) (block_count * progress); i++)
 			{
 				draw_rect(ctx, blocks_x + (block_width + block_spacing) * i,
-							blocks_y,
-							block_width,
-							block_height);
+				               blocks_y,
+				               block_width,
+				               block_height);
 			}
 		}
-		else {
+		else
+		{
 			var width = block_width * block_count * progress;
 			var height = block_height;
 			draw_rect(ctx, blocks_x,
-						blocks_y,
-						width,
-						height);
+			               blocks_y,
+			               width,
+			               height);
 		}
 
 		ctx.set_operator(Cairo.Operator.OVER);
@@ -345,16 +358,16 @@ public class AvizoService : GLib.Object
 
 		if (is_wayland(display))
 		{
-		  GtkLayerShell.init_for_window(window);
-		  GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
-		  GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
-		  GtkLayerShell.set_exclusive_zone(window, -1);
+			GtkLayerShell.init_for_window(window);
+			GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
+			GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
+			GtkLayerShell.set_exclusive_zone(window, -1);
 #if HAVE_LATEST_GTK_LAYER_SHELL
-		  GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE);
+			GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE);
 #else
-		  GtkLayerShell.set_keyboard_interactivity(window, false);
+			GtkLayerShell.set_keyboard_interactivity(window, false);
 #endif
-    }
+		}
 
 		return window;
 	}
