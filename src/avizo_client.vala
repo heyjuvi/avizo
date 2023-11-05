@@ -22,6 +22,9 @@ interface AvizoService : GLib.Object
 	public abstract Gdk.RGBA border_color { owned get; set; }
 	public abstract Gdk.RGBA bar_fg_color { owned get; set; }
 	public abstract Gdk.RGBA bar_bg_color { owned get; set; }
+	public abstract bool disable_progress { owned get;set; }
+	public abstract string text { owned get; set; }
+	public abstract int font_size { owned get; set; }
 
 	public abstract void show(double seconds) throws DBusError, IOError;
 }
@@ -52,6 +55,9 @@ public class AvizoClient : GLib.Application
 	private static string _border_color = "";
 	private static string _bar_fg_color = "";
 	private static string _bar_bg_color = "";
+	private static bool _disable_progress = false;
+	private static string _text = "";
+	private static int _font_size = 24;
 
 	private static double _time = 5.0;
 
@@ -80,16 +86,19 @@ public class AvizoClient : GLib.Application
 		{ "bar-fg-color", 0, 0, OptionArg.STRING, ref _bar_fg_color, "Sets the color of the filled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "bar-bg-color", 0, 0, OptionArg.STRING, ref _bar_bg_color, "Sets the color of the unfilled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "time", 0, 0, OptionArg.DOUBLE, ref _time, "Sets the time to show the notification, default is 5", "DOUBLE" },
+		{ "disable-progress", 0, 0, OptionArg.NONE, ref _disable_progress, "Disable progress indicator", null },
+		{ "text", 0, 0, OptionArg.STRING, ref _text, "Sets the text in notification, work only if progress is disabled", "STRING" },
+		{ "font-size", 0, 0, OptionArg.INT, ref _font_size, "Sets the text font size", "INT" },
 		{ null }
 	};
 
 	public AvizoClient()
 	{
 		Object(application_id: "org.danb.avizo.client",
-		       flags: ApplicationFlags.HANDLES_COMMAND_LINE);
+		        flags: ApplicationFlags.HANDLES_COMMAND_LINE);
 
 		_service = Bus.get_proxy_sync(BusType.SESSION, "org.danb.avizo.service",
-		                                             "/org/danb/avizo/service");
+		        "/org/danb/avizo/service");
 	}
 
 	public override int command_line(ApplicationCommandLine command_line)
@@ -167,14 +176,17 @@ public class AvizoClient : GLib.Application
 		if (_image_path != "")
 		{
 			_service.image_path = Filename.canonicalize(_image_path, _image_base_dir);
+			_service.image_resource = "";
 		}
 		else
 		{
 			_service.image_resource = _image_resource;
+			_service.image_path = "";
 		}
 
 		_service.image_opacity = _image_opacity;
 		_service.progress = _progress;
+		_service.disable_progress = _disable_progress;
 		_service.width = _width;
 		_service.height = _height;
 		_service.padding = _padding;
@@ -187,6 +199,10 @@ public class AvizoClient : GLib.Application
 
 		_service.fade_in = _fade_in;
 		_service.fade_out = _fade_out;
+		
+		_service.text = _text;
+		_service.font_size = _font_size;
+
 
 		if (_background != "")
 		{
