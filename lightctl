@@ -54,7 +54,7 @@ while getopts ':e:D:h:d' OPT; do
 		e) exp=$OPTARG;;
 		D) dev=$OPTARG;;
 		h) help; exit 0;;
-                d) dark=1;;
+		d) dark=1;;
 		\?) case "$OPTARG" in
 		    	[0-9]*) break;;
 		    	*) die "unknown option: -$OPTARG";;
