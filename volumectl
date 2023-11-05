@@ -84,7 +84,7 @@ while getopts ':adbD:pg:muh' OPT; do
 		g) opts="$opts --gamma=$OPTARG";;
 		m) dev_type='source';;
 		u) unmute_opt='--unmute';;
-                d) dark=1;;
+		d) dark=1;;
 		h) help; exit 0;;
 		\?) case "$OPTARG" in
 		    	[0-9]*) break;;
