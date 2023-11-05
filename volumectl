@@ -30,6 +30,7 @@
 #   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
 #   -m               Control the source (mic) instead of sink (output).
 #   -u               Unmute when changing the volume (+|-|=).
+#   -d               Show dark theme friendly variant of the icon
 #   -h               Show this message and exit.
 #
 # This script is part of the avizo package.
@@ -73,7 +74,8 @@ use_playing=false
 opts=
 unmute_opt=
 optind=1
-while getopts ':abD:pg:muh' OPT; do
+dark=0
+while getopts ':adbD:pg:muh' OPT; do
 	case "$OPT" in
 		a) all_flag=true;;
 		b) opts="$opts --allow-boost";;
@@ -82,6 +84,7 @@ while getopts ':abD:pg:muh' OPT; do
 		g) opts="$opts --gamma=$OPTARG";;
 		m) dev_type='source';;
 		u) unmute_opt='--unmute';;
+                d) dark=1;;
 		h) help; exit 0;;
 		\?) case "$OPTARG" in
 		    	[0-9]*) break;;
@@ -172,6 +175,10 @@ case "$dev_type" in
 		fi
 	;;
 esac
+
+if [ "$dark" -eq 1 ]; then
+    image="${image}_dark"
+fi
 
 progress=$(echo "$volume" | awk '{ printf "%.2f", ($1 > 100 ? 1 : $1 / 100) }')
 avizo-client --image-resource="$image" --progress="$progress"

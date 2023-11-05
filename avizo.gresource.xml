@@ -13,5 +13,16 @@
 		<file preprocess="to-pixdata">data/images/brightness_low.png</file>
 		<file preprocess="to-pixdata">data/images/brightness_medium.png</file>
 		<file preprocess="to-pixdata">data/images/brightness_high.png</file>
+
+		<file preprocess="to-pixdata">data/images/volume_muted_dark.png</file>
+		<file preprocess="to-pixdata">data/images/volume_low_dark.png</file>
+		<file preprocess="to-pixdata">data/images/volume_medium_dark.png</file>
+		<file preprocess="to-pixdata">data/images/volume_high_dark.png</file>
+		<file preprocess="to-pixdata">data/images/mic_muted_dark.png</file>
+		<file preprocess="to-pixdata">data/images/mic_unmuted_dark.png</file>
+
+		<file preprocess="to-pixdata">data/images/brightness_low_dark.png</file>
+		<file preprocess="to-pixdata">data/images/brightness_medium_dark.png</file>
+		<file preprocess="to-pixdata">data/images/brightness_high_dark.png</file>
 	</gresource>
 </gresources>
