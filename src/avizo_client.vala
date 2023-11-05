@@ -88,8 +88,9 @@ public class AvizoClient : GLib.Application
 		Object(application_id: "org.danb.avizo.client",
 		       flags: ApplicationFlags.HANDLES_COMMAND_LINE);
 
-		_service = Bus.get_proxy_sync(BusType.SESSION, "org.danb.avizo.service",
-		                                             "/org/danb/avizo/service");
+		_service = Bus.get_proxy_sync(BusType.SESSION,
+		                              "org.danb.avizo.service",
+		                              "/org/danb/avizo/service");
 	}
 
 	public override int command_line(ApplicationCommandLine command_line)
