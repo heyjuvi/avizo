@@ -22,6 +22,7 @@ interface AvizoService : GLib.Object
 	public abstract Gdk.RGBA border_color { owned get; set; }
 	public abstract Gdk.RGBA bar_fg_color { owned get; set; }
 	public abstract Gdk.RGBA bar_bg_color { owned get; set; }
+	public abstract int monitor { owned get; set; }
 
 	public abstract void show(double seconds) throws DBusError, IOError;
 }
@@ -52,6 +53,7 @@ public class AvizoClient : GLib.Application
 	private static string _border_color = "";
 	private static string _bar_fg_color = "";
 	private static string _bar_bg_color = "";
+	private static int _monitor = -1;
 
 	private static double _time = 5.0;
 
@@ -80,6 +82,7 @@ public class AvizoClient : GLib.Application
 		{ "bar-fg-color", 0, 0, OptionArg.STRING, ref _bar_fg_color, "Sets the color of the filled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "bar-bg-color", 0, 0, OptionArg.STRING, ref _bar_bg_color, "Sets the color of the unfilled bar blocks in format rgba([0, 255], [0, 255], [0, 255], [0, 1])", "STRING" },
 		{ "time", 0, 0, OptionArg.DOUBLE, ref _time, "Sets the time to show the notification, default is 5", "DOUBLE" },
+		{ "monitor", 0, 0, OptionArg.INT, ref _monitor, "Sets the monitor to show the notification on, default is all", "INT" },
 		{ null }
 	};
 
@@ -188,6 +191,7 @@ public class AvizoClient : GLib.Application
 
 		_service.fade_in = _fade_in;
 		_service.fade_out = _fade_out;
+		_service.monitor = _monitor;
 
 		if (_background != "")
 		{

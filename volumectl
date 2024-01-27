@@ -29,6 +29,7 @@
 #                      it will choose the first one as reported by pactl/pamixer.
 #   -g <gamma>       Increase/decrease using gamma correction (e.g. 2.2).
 #   -m               Control the source (mic) instead of sink (output).
+#   -M <monitornr>   Set monitor where notification will be shown.
 #   -u               Unmute when changing the volume (+|-|=).
 #   -d               Show dark theme friendly variant of the icon
 #   -h               Show this message and exit.
@@ -75,7 +76,8 @@ opts=
 unmute_opt=
 optind=1
 dark=0
-while getopts ':adbD:pg:muh' OPT; do
+monitor=-1
+while getopts ':adbD:pg:mM:uh' OPT; do
 	case "$OPT" in
 		a) all_flag=true;;
 		b) opts="$opts --allow-boost";;
@@ -83,6 +85,7 @@ while getopts ':adbD:pg:muh' OPT; do
 		p) use_playing=true;;
 		g) opts="$opts --gamma=$OPTARG";;
 		m) dev_type='source';;
+		M) monitor="$OPTARG";;
 		u) unmute_opt='--unmute';;
 		d) dark=1;;
 		h) help; exit 0;;
@@ -181,4 +184,4 @@ if [ "$dark" -eq 1 ]; then
 fi
 
 progress=$(echo "$volume" | awk '{ printf "%.2f", ($1 > 100 ? 1 : $1 / 100) }')
-avizo-client --image-resource="$image" --progress="$progress"
+avizo-client --image-resource="$image" --progress="$progress" --monitor="$monitor"
