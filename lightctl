@@ -17,6 +17,7 @@
 # Options:
 #   -e <exponent>   Change percentage curve to exponential (only for brightnessctl).
 #   -D <device>     Specify the device name.
+#   -M <monitornr>  Set monitor where notification will be shown.
 #   -d              Show dark theme friendly variant of the icon
 #   -h              Show this message and exit.
 #
@@ -49,11 +50,13 @@ exp=
 dev=
 optind=1
 dark=0
-while getopts ':e:D:h:d' OPT; do
+monitor=-1
+while getopts ':e:D:h:M:d' OPT; do
 	case "$OPT" in
 		e) exp=$OPTARG;;
 		D) dev=$OPTARG;;
 		h) help; exit 0;;
+		M) monitor="$OPTARG";;
 		d) dark=1;;
 		\?) case "$OPTARG" in
 		    	[0-9]*) break;;
@@ -133,4 +136,4 @@ fi
 
 progress=$(echo "$light" | awk '{ printf "%.2f", $1 / 100 }')
 
-avizo-client --image-resource="$image" --progress="$progress"
+avizo-client --image-resource="$image" --progress="$progress" --monitor="$monitor"
