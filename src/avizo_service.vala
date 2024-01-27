@@ -43,6 +43,8 @@ public class AvizoWindow : Gtk.Window
 
 	public double progress { get; set; }
 
+	public int monitor { get; set; }
+
 	private int _width = 248;
 	public int width
 	{
@@ -282,7 +284,7 @@ public class AvizoWindow : Gtk.Window
 public class AvizoService : GLib.Object
 {
 	private static string[] props = {
-		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding",
+		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding", "monitor",
 		"border_radius", "border_width", "block_height", "block_spacing", "block_count", "fade_in", "fade_out", "background", "border_color",
 		"bar_fg_color", "bar_bg_color",
 	};
@@ -306,6 +308,7 @@ public class AvizoService : GLib.Object
 	public Gdk.RGBA border_color { get; set; default = rgba(90, 90, 90, 0.8); }
 	public Gdk.RGBA bar_fg_color { get; set; default = rgba(0, 0, 0, 0.8); }
 	public Gdk.RGBA bar_bg_color { get; set; default = rgba(106, 106, 106, 0.8); }
+	public int monitor { get; set; default = -1; }
 
 	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;
@@ -320,15 +323,24 @@ public class AvizoService : GLib.Object
 			_windows.set_size(monitors);
 		}
 
+		if (monitor >= monitors)
+		{
+			stderr.printf(@"Monitor: $(monitor) does not exist\n");
+			return;
+		}
+
 		for (int i = 0; i < monitors; i++)
 		{
-			var window = _windows.index(i);
-			if (window == null)
+			if (monitor == -1 || monitor == i)
 			{
-				window = create_window(display);
-				_windows.insert_val(i, window);
+				var window = _windows.index(i);
+				if (window == null)
+				{
+					window = create_window(display);
+					_windows.insert_val(i, window);
+				}
+				show_window(window, display.get_monitor(i));
 			}
-			show_window(window, display.get_monitor(i));
 		}
 
 		_open_timeouts++;
@@ -338,8 +350,13 @@ public class AvizoService : GLib.Object
 
 			if (_open_timeouts == 0)
 			{
-				for (int i = 0; i < monitors; i++) {
-					_windows.index(i).hide_animated();
+				for (int i = 0; i < monitors; i++) 
+				{
+					var window = _windows.index(i);
+					if (window != null)
+					{
+						window.hide_animated();
+					}
 				}
 			}
 
