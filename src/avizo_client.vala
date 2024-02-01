@@ -91,9 +91,16 @@ public class AvizoClient : GLib.Application
 		Object(application_id: "org.danb.avizo.client",
 		       flags: ApplicationFlags.HANDLES_COMMAND_LINE);
 
-		_service = Bus.get_proxy_sync(BusType.SESSION,
-		                              "org.danb.avizo.service",
-		                              "/org/danb/avizo/service");
+		try
+		{
+			_service = Bus.get_proxy_sync(BusType.SESSION,
+			                              "org.danb.avizo.service",
+			                              "/org/danb/avizo/service");
+		}
+		catch (IOError e)
+		{
+			stderr.printf(@"avizo: $(e.message)\n");
+		}
 	}
 
 	public override int command_line(ApplicationCommandLine command_line)
@@ -168,62 +175,75 @@ public class AvizoClient : GLib.Application
 			return 0;
 		}
 
-		if (_image_path != "")
+		try
 		{
-			_service.image_path = Filename.canonicalize(_image_path, _image_base_dir);
-		}
-		else
-		{
-			_service.image_resource = _image_resource;
-		}
-
-		_service.image_opacity = _image_opacity;
-		_service.progress = _progress;
-		_service.width = _width;
-		_service.height = _height;
-		_service.padding = _padding;
-		_service.y_offset = _y_offset;
-		_service.border_radius = _border_radius;
-		_service.border_width = _border_width;
-		_service.block_height = _block_height;
-		_service.block_spacing = _block_spacing;
-		_service.block_count = _block_count;
-
-		_service.fade_in = _fade_in;
-		_service.fade_out = _fade_out;
-		_service.monitor = _monitor;
-
-		if (_background != "")
-		{
-			var color = parse_rgba(_background);
-			_service.background = color;
-
-			if (_bar_bg_color == "")
+			if (_image_path != "")
 			{
-				var bar_color = color.copy();
-				bar_color.red /= 1.5;
-				bar_color.green /= 1.5;
-				bar_color.blue /= 1.5;
-				_service.bar_bg_color = bar_color;
+				_service.image_path = Filename.canonicalize(_image_path, _image_base_dir);
 			}
-		}
+			else
+			{
+				_service.image_resource = _image_resource;
+			}
 
-		if (_border_color != "")
+			_service.image_opacity = _image_opacity;
+			_service.progress = _progress;
+			_service.width = _width;
+			_service.height = _height;
+			_service.padding = _padding;
+			_service.y_offset = _y_offset;
+			_service.border_radius = _border_radius;
+			_service.border_width = _border_width;
+			_service.block_height = _block_height;
+			_service.block_spacing = _block_spacing;
+			_service.block_count = _block_count;
+
+			_service.fade_in = _fade_in;
+			_service.fade_out = _fade_out;
+			_service.monitor = _monitor;
+
+			if (_background != "")
+			{
+				var color = parse_rgba(_background);
+				_service.background = color;
+
+				if (_bar_bg_color == "")
+				{
+					var bar_color = color.copy();
+					bar_color.red /= 1.5;
+					bar_color.green /= 1.5;
+					bar_color.blue /= 1.5;
+					_service.bar_bg_color = bar_color;
+				}
+			}
+
+			if (_border_color != "")
+			{
+				_service.border_color = parse_rgba(_border_color);
+			}
+
+			if (_bar_bg_color != "")
+			{
+				_service.bar_bg_color = parse_rgba(_bar_bg_color);
+			}
+
+			if (_bar_fg_color != "")
+			{
+				_service.bar_fg_color = parse_rgba(_bar_fg_color);
+			}
+
+			_service.show(_time);
+		}
+		catch (DBusError e)
 		{
-			_service.border_color = parse_rgba(_border_color);
+			stderr.printf(@"avizo: avizo-service is not running\n");
+			return 1;
 		}
-
-		if (_bar_bg_color != "")
+		catch (IOError e)
 		{
-			_service.bar_bg_color = parse_rgba(_bar_bg_color);
+			stderr.printf(@"avizo: $(e.message)\n");
+			return 1;
 		}
-
-		if (_bar_fg_color != "")
-		{
-			_service.bar_fg_color = parse_rgba(_bar_fg_color);
-		}
-
-		_service.show(_time);
 
 		return 0;
 	}
