@@ -29,7 +29,7 @@ set -eu
 PROGNAME='lightctl'
 
 help() {
-	local tag='---help---'
+	tag='---help---'
 	sed -n "/^#$tag/,/^#$tag/{/^#$tag/d; s/^# \\?//; s|\$0|$0|; p}" "$0"
 }
 
@@ -96,7 +96,7 @@ esac
 if command -v brightnessctl >/dev/null; then
 	prog='brightnessctl'
 	opts="${dev:+-d $dev}"
-	out=$(brightnessctl $opts ${exp:+-e$exp} -m set "${value}%${cmd}")
+	out=$(brightnessctl "$opts" ${exp:+-e$exp} -m set "${value}%${cmd}")
 	light=$(printf '%s\n' "$out" | cut -d, -f4)
 	light=${light%\%}
 
@@ -104,12 +104,12 @@ elif command -v light >/dev/null; then
 	prog='light'
 	opts="${dev:+-s $dev}"
 	case "$cmd" in
-		+) light $opts -A "$value";;
-		-) light $opts -U "$value";;
-		=) light $opts -S "$value";;
+		+) light "$opts" -A "$value";;
+		-) light "$opts" -U "$value";;
+		=) light "$opts" -S "$value";;
 	esac
 
-	light=$(light $opts -G)
+	light=$(light "$opts" -G)
 else
 	die 'command not found: brightnessctl or light'
 fi
@@ -119,7 +119,7 @@ if ! is_integer "$light" && ! is_float "$light"; then
 fi
 
 if is_float "$light"; then
-    light=${light/.*}
+    light=$(echo "$light" | awk -F '.' '{print $1}')
 fi
 
 if [ "$light" -le 33 ]; then
