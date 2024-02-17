@@ -429,7 +429,7 @@ Gdk.RGBA rgba(int red, int green, int blue, double alpha)
 	return o;
 }
 
-void on_bus_aquired(DBusConnection conn)
+void on_bus_acquired(DBusConnection conn)
 {
 	try
 	{
@@ -446,7 +446,7 @@ public void main(string[] args)
 	Gtk.init(ref args);
 
 	Bus.own_name(BusType.SESSION, "org.danb.avizo.service", BusNameOwnerFlags.NONE,
-	             on_bus_aquired,
+	             on_bus_acquired,
 	             () => {},
 	             () => stderr.printf("Could not acquire name\n"));
 
