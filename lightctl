@@ -109,17 +109,14 @@ elif command -v light >/dev/null; then
 		=) light $opts -S "$value";;
 	esac
 
-	light=$(light $opts -G)
+	light="$(light $opts -G)"
+	light="${light%.*}"  # strip decimal part
 else
 	die 'command not found: brightnessctl or light'
 fi
 
-if ! is_integer "$light" && ! is_float "$light"; then
+if ! is_integer "$light"; then
 	die "$prog returned invalid brigtness: '$light'"
-fi
-
-if is_float "$light"; then
-    light=${light/.*}
 fi
 
 if [ "$light" -le 33 ]; then
