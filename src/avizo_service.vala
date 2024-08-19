@@ -297,6 +297,7 @@ public class AvizoService : GLib.Object
 	public int height { get; set; default = 232; }
 	public int padding { get; set; default = 24; }
 	public double y_offset { get; set; default = 0.75; }
+	public double x_offset { get; set; default = 0.50; }
 	public int border_radius { get; set; default = 16; }
 	public int border_width { get; set; default = 1; }
 	public int block_height { get; set; default = 10; }
@@ -350,7 +351,7 @@ public class AvizoService : GLib.Object
 
 			if (_open_timeouts == 0)
 			{
-				for (int i = 0; i < monitors; i++) 
+				for (int i = 0; i < monitors; i++)
 				{
 					var window = _windows.index(i);
 					if (window != null)
@@ -378,6 +379,7 @@ public class AvizoService : GLib.Object
 			GtkLayerShell.init_for_window(window);
 			GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY);
 			GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, true);
+			GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.LEFT, true);
 			GtkLayerShell.set_namespace(window, "avizo");
 			GtkLayerShell.set_exclusive_zone(window, -1);
 #if HAVE_LATEST_GTK_LAYER_SHELL
@@ -392,19 +394,22 @@ public class AvizoService : GLib.Object
 
 	private void show_window(AvizoWindow window, Gdk.Monitor monitor)
 	{
-		var margin = (int) Math.lround((monitor.workarea.height - height) * y_offset);
+		var margin_top = (int) Math.lround((monitor.workarea.height - height) * y_offset);
+		var margin_left = (int) Math.lround((monitor.workarea.width - width) * x_offset);
 
 		if (is_wayland(monitor.get_display()))
 		{
 			GtkLayerShell.set_monitor(window, monitor);
-			GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, margin);
+			GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, margin_top);
+			GtkLayerShell.set_margin(window, GtkLayerShell.Edge.LEFT, margin_left);
 		}
 		else
 		{
-			int x, _y;
+			int x, y;
 			window.set_position(Gtk.WindowPosition.CENTER);
-			window.get_position(out x, out _y);
-			window.move(x, margin);
+			window.get_position(out x, out y);
+			window.move(x, margin_top);
+			window.move(y, margin_left);
 			window.set_type_hint(Gdk.WindowTypeHint.NOTIFICATION);
 			window.set_accept_focus(false);
 		}
