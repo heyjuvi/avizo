@@ -13,6 +13,7 @@ interface AvizoService : GLib.Object
 	public abstract int border_width { owned get; set; }
 	public abstract int padding { owned get; set; }
 	public abstract double y_offset { owned get; set; }
+	public abstract double x_offset { owned get; set; }
 	public abstract int block_height { owned get; set; }
 	public abstract int block_spacing { owned get; set; }
 	public abstract int block_count { owned get; set; }
@@ -41,6 +42,7 @@ public class AvizoClient : GLib.Application
 	private static int _width = 248;
 	private static int _height = 232;
 	private static double _y_offset = 0.75;
+	private static double _x_offset = 0.50;
 	private static int _padding = 24;
 	private static int _border_radius = 16;
 	private static int _border_width = 1;
@@ -68,6 +70,7 @@ public class AvizoClient : GLib.Application
 		{ "width", 0, 0, OptionArg.INT, ref _width, "Sets the width of the notification", "INT" },
 		{ "height", 0, 0, OptionArg.INT, ref _height, "Sets the height of the notification", "INT" },
 		{ "y-offset", 0, 0, OptionArg.DOUBLE, ref _y_offset, "Sets relative offset of the notification to the top of the screen, allowed values range from 0 (top) to 1.0 (bottom)", "DOUBLE" },
+		{ "x-offset", 0, 0, OptionArg.DOUBLE, ref _x_offset, "Sets relative offset of the notification to the left of the screen, allowed values range from 0 (left) to 1.0 (right)", "DOUBLE" },
 		{ "padding", 0, 0, OptionArg.INT, ref _padding, "Sets the inner padding of the notification", "INT" },
 		{ "border-radius", 0, 0, OptionArg.INT, ref _border_radius, "Sets the border radius of the notification in px", "INT" },
 		{ "border-width", 0, 0, OptionArg.INT, ref _border_width, "Sets the border width of the notification in px", "INT" },
@@ -183,6 +186,7 @@ public class AvizoClient : GLib.Application
 		_service.height = _height;
 		_service.padding = _padding;
 		_service.y_offset = _y_offset;
+		_service.x_offset = _x_offset;
 		_service.border_radius = _border_radius;
 		_service.border_width = _border_width;
 		_service.block_height = _block_height;
