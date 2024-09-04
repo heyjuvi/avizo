@@ -408,8 +408,7 @@ public class AvizoService : GLib.Object
 			int x, y;
 			window.set_position(Gtk.WindowPosition.CENTER);
 			window.get_position(out x, out y);
-			window.move(x, margin_top);
-			window.move(y, margin_left);
+			window.move(margin_left, margin_top);
 			window.set_type_hint(Gdk.WindowTypeHint.NOTIFICATION);
 			window.set_accept_focus(false);
 		}
