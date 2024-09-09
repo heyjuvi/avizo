@@ -227,7 +227,18 @@ public class AvizoClient : GLib.Application
 			_service.bar_fg_color = parse_rgba(_bar_fg_color);
 		}
 
-		_service.show(_time);
+		try
+		{
+			_service.show(_time);
+		}
+		catch (GLib.DBusError e)
+		{
+			stderr.printf(@"avizo: $(e.message)\n");
+			stderr.printf("Failed to acquire bus, is avizo-service running?\n");
+
+			return 1;
+		}
+
 
 		return 0;
 	}
