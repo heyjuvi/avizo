@@ -51,7 +51,7 @@ dev=
 optind=1
 dark=0
 monitor=-1
-while getopts 'e:D:hM:d' OPT; do
+while getopts ':e:D:hM:d' OPT; do
 	case "$OPT" in
 		e) exp=$OPTARG;;
 		D) dev=$OPTARG;;
