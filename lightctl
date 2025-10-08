@@ -111,8 +111,22 @@ elif command -v light >/dev/null; then
 
 	light="$(light $opts -G)"
 	light="${light%.*}"  # strip decimal part
+
+# https://github.com/denysvitali/lightctl
+elif command -v lightctl >/dev/null; then
+	prog='lightctl'
+	opts="${dev:+-d $dev}"
+	case "$cmd" in
+		+) $prog $opts increase;;
+		-) $prog $opts decrease;;
+		-) $prog $opts set "$value";;
+	esac
+  cur_light=$(cat /sys/class/backlight/acpi_video0/brightness)
+  max_light=$(cat /sys/class/backlight/acpi_video0/max_brightness)
+  light=$(echo $cur_light $max_light | awk '{printf "%.0f", $1/$2*100}')
+
 else
-	die 'command not found: brightnessctl or light'
+	die 'command not found: brightnessctl or light or lightctl'
 fi
 
 if ! is_integer "$light"; then
