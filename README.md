@@ -39,7 +39,7 @@ Adjust (display) brightness and show Avizo notification.
 
 * POSIX-sh compatible shell (e.g. Busybox ash, dash, ZSH, bash, …)
 * common \*nix userland (BSD, Busybox or GNU)
-* [brightnessctl](https://github.com/Hummer12007/brightnessctl) or [light](https://github.com/haikarainen/light)
+* [brightnessctl](https://github.com/Hummer12007/brightnessctl) or [light](https://gitlab.com/dpeukert/light)
 
 
 ## Sway config
