@@ -7,24 +7,30 @@ extern Type get_wayland_type();
 [GtkTemplate (ui = "/org/danb/avizo/ui/avizo.ui")]
 public class AvizoWindow : Gtk.Window
 {
+	private string _image_path = "";
 	public string image_path
 	{
 		set
 		{
 			if (value != "")
 			{
-				image.set_from_file(value);
+				_image_path = value;
+				_image_resource = "";
+				update_image();
 			}
 		}
 	}
 
+	private string _image_resource = "";
 	public string image_resource
 	{
 		set
 		{
 			if (value != "")
 			{
-				image.set_from_resource(@"/org/danb/avizo/data/images/$(value).png");
+				_image_resource = value;
+				_image_path = "";
+				update_image();
 			}
 		}
 	}
@@ -111,6 +117,115 @@ public class AvizoWindow : Gtk.Window
 		}
 
 		draw.connect(on_draw);
+		notify["scale-factor"].connect(update_image);
+	}
+
+	// Renders the image at the output's scale factor, so that it stays sharp on
+	// scaled outputs (GTK draws a plain pixbuf at scale 1 and stretches it).
+	private void update_image()
+	{
+		int scale = int.max(get_scale_factor(), 1);
+		Gdk.Pixbuf? pixbuf = null;
+
+		try
+		{
+			if (_image_resource != "")
+			{
+				var path = @"/org/danb/avizo/data/images/$(_image_resource)";
+				var natural = new Gdk.Pixbuf.from_resource(path + ".png");
+				pixbuf = natural;
+				if (scale > 1)
+				{
+					try
+					{
+						pixbuf = render_like(path + ".svg", natural, scale);
+					}
+					catch (Error e)
+					{
+						pixbuf = natural.scale_simple(natural.width * scale,
+							natural.height * scale, Gdk.InterpType.BILINEAR);
+					}
+				}
+			}
+			else if (_image_path != "")
+			{
+				int width, height;
+				if (Gdk.Pixbuf.get_file_info(_image_path, out width, out height) == null)
+				{
+					throw new FileError.INVAL(@"unknown image format: $(_image_path)");
+				}
+				pixbuf = new Gdk.Pixbuf.from_file_at_scale(_image_path,
+					width * scale, height * scale, true);
+			}
+		}
+		catch (Error e)
+		{
+			warning("Could not load image: %s", e.message);
+			return;
+		}
+
+		if (pixbuf != null)
+		{
+			image.set_from_surface(Gdk.cairo_surface_create_from_pixbuf(pixbuf, scale, null));
+		}
+	}
+
+	// Renders the SVG source of a built-in image so that it lines up with the
+	// PNG at scale times its size: the PNGs are renders of the SVGs cropped to
+	// different margins, so match the drawn (non-transparent) part of both.
+	private static Gdk.Pixbuf render_like(string svg_path, Gdk.Pixbuf png, int scale) throws Error
+	{
+		var png_box = content_box(png);
+		var svg_natural = new Gdk.Pixbuf.from_resource(svg_path);
+		var svg_natural_box = content_box(svg_natural);
+		double factor = (double) (png_box.width * scale) / svg_natural_box.width;
+
+		var svg = new Gdk.Pixbuf.from_resource_at_scale(svg_path,
+			(int) Math.round(svg_natural.width * factor),
+			(int) Math.round(svg_natural.height * factor), true);
+		var svg_box = content_box(svg);
+
+		var result = new Gdk.Pixbuf(Gdk.Colorspace.RGB, true, 8,
+			png.width * scale, png.height * scale);
+		result.fill(0);
+		int x = png_box.x * scale;
+		int y = png_box.y * scale;
+		int width = int.min(svg_box.width, result.width - x);
+		int height = int.min(svg_box.height, result.height - y);
+		svg.copy_area(svg_box.x, svg_box.y, width, height, result, x, y);
+		return result;
+	}
+
+	// The smallest rectangle holding every pixel that is not fully transparent.
+	private static Gdk.Rectangle content_box(Gdk.Pixbuf pixbuf)
+	{
+		var box = Gdk.Rectangle() { x = 0, y = 0, width = pixbuf.width, height = pixbuf.height };
+		if (!pixbuf.has_alpha || pixbuf.n_channels != 4)
+		{
+			return box;
+		}
+
+		unowned uint8[] pixels = pixbuf.get_pixels_with_length();
+		int stride = pixbuf.rowstride;
+		int left = pixbuf.width, right = -1, top = pixbuf.height, bottom = -1;
+		for (int y = 0; y < pixbuf.height; y++)
+		{
+			for (int x = 0; x < pixbuf.width; x++)
+			{
+				if (pixels[y * stride + x * 4 + 3] != 0)
+				{
+					left = int.min(left, x);
+					right = int.max(right, x);
+					top = int.min(top, y);
+					bottom = int.max(bottom, y);
+				}
+			}
+		}
+		if (right >= 0)
+		{
+			box = Gdk.Rectangle() { x = left, y = top, width = right - left + 1, height = bottom - top + 1 };
+		}
+		return box;
 	}
 
 	public void show_animated()
