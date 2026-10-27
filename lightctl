@@ -17,7 +17,8 @@
 # Options:
 #   -e <exponent>   Change percentage curve to exponential (only for brightnessctl).
 #   -D <device>     Specify the device name.
-#   -M <monitornr>  Set monitor where notification will be shown.
+#   -M <monitornr>  Set monitor where notification will be shown
+#                   ('focused' for the focused one).
 #   -d              Show dark theme friendly variant of the icon
 #   -h              Show this message and exit.
 #
@@ -133,4 +134,9 @@ fi
 
 progress=$(echo "$light" | awk '{ printf "%.2f", $1 / 100 }')
 
-avizo-client --image-resource="$image" --progress="$progress" --monitor="$monitor"
+if [ "$monitor" = focused ]; then
+	set -- --focused-output --monitor=-1
+else
+	set -- --monitor="$monitor"
+fi
+avizo-client --image-resource="$image" --progress="$progress" "$@"
