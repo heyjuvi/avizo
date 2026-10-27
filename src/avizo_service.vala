@@ -284,13 +284,52 @@ public class AvizoWindow : Gtk.Window
 public class AvizoService : GLib.Object
 {
 	private static string[] props = {
-		"image_path", "image_resource", "image_opacity", "progress", "width", "height", "padding", "monitor",
+		"image_opacity", "progress", "width", "height", "padding", "monitor",
 		"border_radius", "border_width", "block_height", "block_spacing", "block_count", "fade_in", "fade_out", "background", "border_color",
 		"bar_fg_color", "bar_bg_color",
 	};
 
-	public string image_path { get; set; default = ""; }
-	public string image_resource { get; set; default = "volume_muted"; }
+	// Each notification shows the image that was set last: image_path or
+	// image_resource. Setting either one passes it on to the windows every
+	// time, also when the value is unchanged; a property binding would skip
+	// that, and would apply both to a new window in a fixed order.
+	private string _image_path = "";
+	private string _image_resource = "volume_muted";
+	private bool _image_from_path = false;
+
+	public string image_path
+	{
+		get
+		{
+			return _image_path;
+		}
+
+		set
+		{
+			_image_path = value;
+			_image_from_path = value != "";
+			update_window_images();
+		}
+	}
+
+	public string image_resource
+	{
+		get
+		{
+			return _image_resource;
+		}
+
+		set
+		{
+			_image_resource = value;
+			if (value != "")
+			{
+				_image_from_path = false;
+			}
+			update_window_images();
+		}
+	}
+
 	public double image_opacity { get; set; default = 1.0; }
 	public double progress { get; set; default = 0.0; }
 	public int width { get; set; default = 248; }
@@ -313,6 +352,30 @@ public class AvizoService : GLib.Object
 
 	private Array<AvizoWindow> _windows = new Array<AvizoWindow>();
 	private int _open_timeouts = 0;
+
+	private void update_window_images()
+	{
+		for (uint i = 0; i < _windows.length; i++)
+		{
+			var window = _windows.index(i);
+			if (window != null)
+			{
+				set_window_image(window);
+			}
+		}
+	}
+
+	private void set_window_image(AvizoWindow window)
+	{
+		if (_image_from_path)
+		{
+			window.image_path = _image_path;
+		}
+		else
+		{
+			window.image_resource = _image_resource;
+		}
+	}
 
 	public void show(double seconds) throws DBusError, IOError
 	{
@@ -373,6 +436,7 @@ public class AvizoService : GLib.Object
 		{
 			bind_property(prop_name, window, prop_name, BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
 		}
+		set_window_image(window);
 
 		if (is_wayland(display))
 		{
