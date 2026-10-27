@@ -13,6 +13,7 @@
 #   + | up          Increase brightness by <value> percents (defaults to 5).
 #   - | down        Decrease brightness by <value> percents (defaults to 5).
 #   = | set         Set brightness to <value> percents.
+#   show            Show the current brightness without changing it.
 #
 # Options:
 #   -e <exponent>   Change percentage curve to exponential (only for brightnessctl).
@@ -89,6 +90,7 @@ case "$cmd" in
 	+ | up | raise) cmd='+';;
 	- | down | lower) cmd='-';;
 	= | set) cmd='=';;
+	show) ;;
 	*) die "invalid command: $cmd (see '$0 -h')";;
 esac
 
@@ -96,7 +98,11 @@ esac
 if command -v brightnessctl >/dev/null; then
 	prog='brightnessctl'
 	opts="${dev:+-d $dev}"
-	out=$(brightnessctl $opts ${exp:+-e$exp} -m set "${value}%${cmd}")
+	if [ "$cmd" = show ]; then
+		out=$(brightnessctl $opts ${exp:+-e$exp} -m info)
+	else
+		out=$(brightnessctl $opts ${exp:+-e$exp} -m set "${value}%${cmd}")
+	fi
 	light=$(printf '%s\n' "$out" | cut -d, -f4)
 	light=${light%\%}
 

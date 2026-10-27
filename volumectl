@@ -16,6 +16,7 @@
 #   x | mute         Set mute.
 #   u | unmute       Unset mute.
 #   % | toggle-mute  Switch between mute and unmute.
+#   show             Show the current volume without changing it.
 #
 # Options:
 #   -a               Use with mute, unmute or toggle-mute command to sync the
@@ -123,6 +124,7 @@ case "$cmd" in
 	x | mute) cmd_opt='--mute';;
 	u | unmute) cmd_opt='--unmute';;
 	% | toggle-mute) cmd_opt='--toggle-mute';;
+	show) cmd_opt='';;
 	*) die "invalid command: $cmd (see '$0 -h')";;
 esac
 case "$cmd_opt" in
@@ -140,7 +142,9 @@ elif $use_playing && id=$(playing_dev_id "$dev_type"); then
 fi
 
 
-pamixer $dev_opt $opts $unmute_opt $cmd_opt
+if [ -n "$cmd_opt" ]; then
+	pamixer $dev_opt $opts $unmute_opt $cmd_opt
+fi
 
 # Note: pamixer returns 1 when muted or volume is 0
 muted=$(pamixer $dev_opt --get-mute || :)
