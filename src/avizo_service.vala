@@ -206,7 +206,7 @@ public class AvizoWindow : Gtk.Window
 		draw_round_rect(ctx, 0, 0, _width, _height, border_radius);
 
 		Gdk.cairo_set_source_rgba(ctx, background);
-		draw_round_rect(ctx, border_width, border_width, _width - 2 * border_width, _height - 2 * border_width, border_radius - border_width);
+		draw_round_rect(ctx, border_width, border_width, _width - 2 * border_width, _height - 2 * border_width, int.max(border_radius - border_width, 0));
 
 		Gdk.cairo_set_source_rgba(ctx, bar_bg_color);
 
